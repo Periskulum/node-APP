@@ -16,7 +16,7 @@
 10. [Contributing](#contributing)
 11. [License](#license)
 12. [Acknowledgements](#acknowledgements)
-13. [Contact](#contact)
+
 
 ## Introduction
 
@@ -107,8 +107,8 @@ svelte-flow-webapp/
 
 1. Clone the repository:
     ```
-    git clone https://github.com/your-username/svelte-flow-webapp.git
-    cd svelte-flow-webapp
+    git clone https://github.com/Periskulum/node-APP.git
+    cd node-APP
     ```
 
 2. Install dependencies:
@@ -226,8 +226,4 @@ This project is open source and available under the [MIT License](LICENSE).
 - [Vite](https://vitejs.dev/)
 - [Node.js](https://nodejs.org/)
 - [npm](https://www.npmjs.com/)
-
-## Contact
-
-For any inquiries or issues, please contact [your-email@example.com].
 

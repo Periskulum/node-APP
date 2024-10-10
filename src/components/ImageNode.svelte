@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { getNextZIndex } from '../stores/zIndex.js';
   import { darkMode } from '../stores/darkMode.js';
+  import { selectedNodes } from '../stores/selectionStore.js';
 
   export let x = 0;
   export let y = 0;
@@ -22,12 +23,17 @@
   let isEditing = false;
   let isLoading = false;
 
+  $: isSelected = $selectedNodes.includes(id);
   $: isDarkMode = $darkMode;
 
   function handleMouseDown(event) {
-    if (isNonFunctional || isFactoryNode || isLocked) return;
-    if (event.button === 0) { // Left mouse button for regular nodes
-      startDragging(event);
+    if (isNonFunctional || isFactoryNode) return;
+    if (event.button === 0) {
+      dispatch('nodeClick', { id, ctrlKey: event.ctrlKey || event.metaKey });
+      if (!isLocked) {
+        startDragging(event);
+      }
+      event.stopPropagation();
     }
   }
 
@@ -37,21 +43,19 @@
       startX = event.clientX - x;
       startY = event.clientY - y;
       zIndex = getNextZIndex();
-      dispatch('select');
       event.target.setPointerCapture(event.pointerId);
     }
   }
 
   function handleMouseMove(event) {
-  if (isDragging) {
-    const newX = event.clientX - startX;
-    const newY = event.clientY - startY;
-    x = newX;
-    y = newY;
-    dispatch('move', { id, x: newX, y: newY, imageUrl });
+    if (isDragging) {
+      const newX = event.clientX - startX;
+      const newY = event.clientY - startY;
+      x = newX;
+      y = newY;
+      dispatch('move', { id, x: newX, y: newY, imageUrl });
+    }
   }
-}
-
 
   function handleMouseUp(event) {
     if (isDragging) {
@@ -101,11 +105,11 @@
   class:factory-node={isFactoryNode}
   class:non-functional={isNonFunctional}
   style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode ? 0 : y}px; z-index: {zIndex}; background-color: {color};"
-  on:pointerdown={handleMouseDown}
+  on:pointerdown|stopPropagation={handleMouseDown}
   on:pointermove={handleMouseMove}
   on:pointerup={handleMouseUp}
   on:pointercancel={handleMouseUp}
-  on:contextmenu={handleContextMenu}
+  on:contextmenu|stopPropagation={handleContextMenu}
 >
   <div class="header">
     <span>image.node</span>
@@ -163,18 +167,20 @@
     flex-direction: column;
   }
 
-
   .dark-mode {
     background-color: #2980b9;
   }
 
   .selected {
-    box-shadow: 0 0 0 3px #27ae60, 0 2px 10px rgba(0, 0, 0, 0.2);
-    transform: scale(1.05);
+    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .selected:hover {
+    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .image-node:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .header {

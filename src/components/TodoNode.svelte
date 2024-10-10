@@ -2,10 +2,12 @@
   import { createEventDispatcher } from 'svelte';
   import { getNextZIndex } from '../stores/zIndex.js';
   import { darkMode } from '../stores/darkMode.js';
+  import { selectedNodes } from '../stores/selectionStore.js';
 
   export let x = 0;
   export let y = 0;
   export let tasks = [];
+  export let label = '';
   export let title = 'todo.node';
   export let isSelected = false;
   export let id;
@@ -24,12 +26,17 @@
   let newPriority = 'low';
   let newDueDate = '';
 
+  $: isSelected = $selectedNodes.includes(id);
   $: isDarkMode = $darkMode;
 
   function handleMouseDown(event) {
-    if (isNonFunctional || isFactoryNode || isLocked) return;
+    if (isNonFunctional || isFactoryNode) return;
     if (event.button === 0) {
-      startDragging(event);
+      dispatch('nodeClick', { id, ctrlKey: event.ctrlKey || event.metaKey });
+      if (!isLocked) {
+        startDragging(event);
+      }
+      event.stopPropagation();
     }
   }
 
@@ -88,9 +95,8 @@
     dispatch('contentUpdate', { id, tasks: updatedTasks });
   }
 
-  // Listen for changes to the tasks prop
-  $: if (tasks) {
-    // You can add any additional logic here if needed when tasks prop changes
+  function dispatchContentUpdate() {
+    dispatch('contentUpdate', { id, title, tasks });
   }
 
   function handleContextMenu(event) {
@@ -102,16 +108,17 @@
 <div
   class="todo-node"
   role="group"
+  label={label}
   class:dark-mode={isDarkMode}
   class:selected={isSelected}
   class:factory-node={isFactoryNode}
   class:non-functional={isNonFunctional}
   style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode ? 0 : y}px; z-index: {zIndex}; background-color: {color};"
-  on:pointerdown={handleMouseDown}
+  on:pointerdown|stopPropagation={handleMouseDown}
   on:pointermove={handleMouseMove}
   on:pointerup={handleMouseUp}
   on:pointercancel={handleMouseUp}
-  on:contextmenu={handleContextMenu}
+  on:contextmenu|stopPropagation={handleContextMenu}
 >
   <div class="header">
     <span>todo.node</span>
@@ -123,7 +130,6 @@
   </div>
   <h3>{title}</h3>
   {#if isEditing && !isNonFunctional}
-    <!-- svelte-ignore missing-declaration -->
     <input
       bind:value={title}
       placeholder="enter.title"
@@ -188,12 +194,15 @@
   }
 
   .selected {
-    box-shadow: 0 0 0 3px #27ae60, 0 2px 10px rgba(0, 0, 0, 0.2);
-    transform: scale(1.05);
+    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .selected.dark-mode {
+    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .todo-node:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .header {

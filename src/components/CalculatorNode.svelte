@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { getNextZIndex } from '../stores/zIndex.js';
   import { darkMode } from '../stores/darkMode.js';
+  import { selectedNodes } from '../stores/selectionStore.js';
 
   export let x = 0;
   export let y = 0;
@@ -21,12 +22,17 @@
   let result = 0;
   let input = '';
 
+  $: isSelected = $selectedNodes.includes(id);
   $: isDarkMode = $darkMode;
 
   function handleMouseDown(event) {
-    if (isNonFunctional || isFactoryNode || isLocked) return;
-    if (event.button === 0) { // Left mouse button for regular nodes
-      startDragging(event);
+    if (isNonFunctional || isFactoryNode) return;
+    if (event.button === 0) {
+      dispatch('nodeClick', { id, ctrlKey: event.ctrlKey || event.metaKey });
+      if (!isLocked) {
+        startDragging(event);
+      }
+      event.stopPropagation();
     }
   }
 
@@ -78,11 +84,11 @@
   class:factory-node={isFactoryNode}
   class:non-functional={isNonFunctional}
   style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode ? 0 : y}px; z-index: {zIndex}; background-color: {color}; label:{label}"
-  on:pointerdown={handleMouseDown}
+  on:pointerdown|stopPropagation={handleMouseDown}
   on:pointermove={handleMouseMove}
   on:pointerup={handleMouseUp}
   on:pointercancel={handleMouseUp}
-  on:contextmenu={handleContextMenu}
+  on:contextmenu|stopPropagation={handleContextMenu}
 >
   <div class="header">calc.node</div>
   <input
@@ -98,7 +104,6 @@
 <style>
   .calculator-node {
     position: absolute;
-    background-color: #9b59b6;
     color: white;
     padding: 12px;
     border-radius: 8px;
@@ -109,19 +114,29 @@
     touch-action: none;
     transition: box-shadow 0.3s ease, transform 0.3s ease;
     width: 200px;
+    word-wrap: break-word;
+    font-size: large;
   }
 
   .dark-mode {
-    background-color: #8e44ad;
+    color: #eee;
+  }
+
+  .selected.dark-mode {
+    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .selected.dark-mode:hover {
+    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .selected {
-    box-shadow: 0 0 0 3px #27ae60, 0 2px 10px rgba(0, 0, 0, 0.2);
-    transform: scale(1.05);
+    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: inset;
   }
 
   .calculator-node:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .header {
