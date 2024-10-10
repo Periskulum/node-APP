@@ -1,6 +1,7 @@
 <script>
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import { darkMode } from '../stores/darkMode.js';
+  import { nodes } from '../stores/nodes.js';
   import Node from './Node.svelte';
   import MakeNode from './MakeNode.svelte';
   import DarkNode from './DarkNode.svelte';
@@ -11,15 +12,10 @@
 
   const dispatch = createEventDispatcher();
 
-  const TOP_MARGIN = 20; // Top margin for the first row of nodes
-  const LEFT_MARGIN = 30; // Left margin for all nodes
+  const TOP_MARGIN = 20;
+  const LEFT_MARGIN = 30;
 
   function getInitialNodes() {
-    const makeNodeWidth = 180;
-    const darkNodeWidth = 120;
-    const basicNodeWidth = 80;
-    const totalWidth = makeNodeWidth + darkNodeWidth + basicNodeWidth * 2;
-
     return [
       { id: 'factory-2', component: MakeNode, props: { x: LEFT_MARGIN + 100, y: TOP_MARGIN, label: 'make.node', width: 180, height: 80 } },
       { id: 'factory-3', component: DarkNode, props: { x: LEFT_MARGIN, y: TOP_MARGIN, label: 'dark.node', width: 80, height: 80 } },
@@ -33,35 +29,31 @@
 
   let factoryNodes = getInitialNodes();
   let factoryBounds;
-
-  // Panning variables
   let isPanning = false;
   let panY = 0;
   let startPanY = 0;
-
-  // Node dragging variables
   let isDraggingNode = false;
   let draggedNodeId = null;
   let startX = 0;
   let startY = 0;
 
   function handleCanvasMouseDown(event) {
-    if (event.button === 1) { // Middle mouse button
+    if (event.button === 1) {
       isPanning = true;
       startPanY = event.clientY - panY;
-      event.preventDefault(); // Prevent default middle-click behavior
+      event.preventDefault();
     }
   }
 
   function handleNodeMouseDown(event, id) {
-    if (event.button === 1) { // Middle mouse button
+    if (event.button === 1) {
       isDraggingNode = true;
       draggedNodeId = id;
       const node = factoryNodes.find(n => n.id === id);
       startX = event.clientX - node.props.x;
       startY = event.clientY - node.props.y;
       event.preventDefault();
-      event.stopPropagation(); // Prevent event from triggering canvas panning
+      event.stopPropagation();
     }
   }
 
@@ -79,13 +71,9 @@
 
   function handleWindowMouseUp(event) {
     if (event.button === 1) {
-      if (isDraggingNode) {
-        isDraggingNode = false;
-        draggedNodeId = null;
-      }
-      if (isPanning) {
-        isPanning = false;
-      }
+      isDraggingNode = false;
+      draggedNodeId = null;
+      isPanning = false;
     }
   }
 
@@ -111,16 +99,27 @@
     }));
     event.dataTransfer.effectAllowed = 'copy';
   }
+
+  function clearLocalStorage() {
+    localStorage.clear();
+    nodes.set([]);
+    darkMode.set(false);
+    alert('Local storage cleared. Refresh the page to see the changes.');
+  }
 </script>
 
 <div class="node-factory-content" bind:this={factoryBounds}>
   <div class="node-factory-header">
     <h2>node.factory</h2>
-    <button on:click={resetNodePositions} class="reset-button">
-      <span class="material-icons">restart_alt</span>
-    </button>
+    <div class="header-buttons">
+      <button on:click={clearLocalStorage} class="clear-storage-button" title="Clear local storage">
+        <span class="material-icons">delete_sweep</span>
+      </button>
+      <button on:click={resetNodePositions} class="reset-button" title="Reset node positions">
+        <span class="material-icons">restart_alt</span>
+      </button>
+    </div>
   </div>
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="factory-canvas"
        on:mousedown={handleCanvasMouseDown}
        on:mouseleave={handleWindowMouseUp}>
@@ -164,7 +163,13 @@
     transition: background-color 0.3s ease;
   }
 
-  .reset-button {
+  .header-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .reset-button,
+  .clear-storage-button {
     background: none;
     border: none;
     color: white;
@@ -188,7 +193,6 @@
     top: 0;
     left: 0;
     width: 100%;
-    transform: translateY();
   }
 
   .factory-node {

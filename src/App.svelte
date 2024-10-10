@@ -1,4 +1,3 @@
-<!-- src/App.svelte -->
 <script>
   import { onMount } from 'svelte';
   import Canvas from './components/Canvas.svelte';
@@ -22,6 +21,9 @@
     lockAllNodes,
     unlockAllNodes,
   } from './utils/NodeManager.js';
+  import { handleNodeMove, handleNodeClick, handleCreateNode, handleContentUpdate } from './utils/nodeHandlers.js';
+  import { handleNodeContextMenu, handleCanvasContextMenu, handleCanvasClick } from './utils/contextMenuHandlers.js';
+  import { openModal, handleModalConfirm, handleModalCancel, editNodeLabel } from './utils/modalHandlers.js';
 
   let isNodeFactoryOpen = false;
   let nodeFactoryWidth = 0;
@@ -32,140 +34,11 @@
     nodeFactoryWidth = isNodeFactoryOpen ? 25 : 0;
   }
 
-  function handleNodeMove(event) {
-    const { id, x, y } = event.detail;
-    nodes.update((currentNodes) =>
-      currentNodes.map((node) =>
-        node.id === id ? { ...node, props: { ...node.props, x, y } } : node
-      )
-    );
-  }
-
-  function handleNodeClick(event) {
-    const { id, ctrlKey } = event.detail;
-    selectedNodes.update((currentSelection) => {
-      if (ctrlKey) {
-        if (currentSelection.includes(id)) {
-          return currentSelection.filter((nodeId) => nodeId !== id);
-        } else {
-          return [...currentSelection, id];
-        }
-      } else {
-        return [id];
-      }
-    });
-  }
-
   // Initialize nextNodeId based on the current highest node ID
   let nextNodeId;
   $: {
     const nodeIds = $nodes.map((node) => node.id);
     nextNodeId = nodeIds.length > 0 ? Math.max(...nodeIds) + 1 : 1;
-  }
-
-  function handleCreateNode(event) {
-    const { type, x, y, ...props } = event.detail;
-    const newNode = createNewNode(type, x, y, props);
-    if (newNode) {
-      nodes.update((currentNodes) => [...currentNodes, newNode]);
-    }
-  }
-
-  function createNewNode(type, x, y, props) {
-    const id = nextNodeId++;
-    const baseProps = {
-      x,
-      y,
-      isLocked: areNodesLocked,
-      ...props,
-    };
-    switch (type.toLowerCase()) {
-      case 'node':
-        return {
-          id,
-          component: 'Node',
-          props: {
-            label: props.label || `node.${id}`,
-            color: props.color || '#3498db',
-            ...baseProps,
-          },
-        };
-      case 'makenode':
-        return {
-          id,
-          component: 'MakeNode',
-          props: {
-            label: props.label || 'make.node',
-            ...baseProps,
-          },
-        };
-      case 'darknode':
-        return {
-          id,
-          component: 'DarkNode',
-          props: {
-            label: props.label || 'dark.node',
-            color: props.color || '#2c3e50',
-            ...baseProps,
-          },
-        };
-      case 'textnode':
-        return {
-          id,
-          component: 'TextNode',
-          props: {
-            content: props.content || 'hello.world',
-            title: props.title || 'text.node',
-            color: props.color || '#3498db',
-            ...baseProps,
-          },
-        };
-      case 'imagenode':
-        return {
-          id,
-          component: 'ImageNode',
-          props: {
-            imageUrl: 'https://picsum.photos/300/400',
-            title: 'image.node',
-            color: props.color || '#3498db',
-            ...baseProps,
-          },
-        };
-      case 'calculatornode':
-        return {
-          id,
-          component: 'CalculatorNode',
-          props: {
-            label: 'calc.node',
-            color: props.color || '#3498db',
-            ...baseProps,
-          },
-        };
-      case 'todonode':
-        return {
-          id,
-          component: 'TodoNode',
-          props: {
-            label: 'todo.node',
-            color: props.color || '#3498db',
-            ...baseProps,
-          },
-        };
-      default:
-        console.log('Unknown node type:', type);
-        return null;
-    }
-  }
-
-  function handleContentUpdate(event) {
-    const { id, ...updatedProps } = event.detail;
-    nodes.update((currentNodes) =>
-      currentNodes.map((node) =>
-        node.id === id
-          ? { ...node, props: { ...node.props, ...updatedProps } }
-          : node
-      )
-    );
   }
 
   $: searchableNodes = $nodes.map((node) => ({
@@ -206,29 +79,6 @@
   let modalNodeId = null;
   let modalAction = null;
 
-  function openModal({ title, message, placeholder, confirmText, inputValue, nodeId, action }) {
-    modalTitle = title;
-    modalMessage = message;
-    modalPlaceholder = placeholder;
-    modalConfirmText = confirmText || 'Confirm';
-    modalInputValue = inputValue || '';
-    modalNodeId = nodeId;
-    modalAction = action;
-    isModalVisible = true;
-  }
-
-  function handleModalConfirm(event) {
-    const value = event.detail;
-    if (modalAction && (modalNodeId !== null || modalNodeId === null)) {
-      modalAction(modalNodeId, value);
-    }
-    isModalVisible = false;
-  }
-
-  function handleModalCancel() {
-    isModalVisible = false;
-  }
-
   // Context menu handling
   let contextMenuOptions = [];
   let contextMenuPosition = { x: 0, y: 0 };
@@ -237,156 +87,6 @@
   let initialColor = '#3498db';
   let showColorPicker = false;
   let colorPickerContext = '';
-
-
-  function handleNodeContextMenu(event) {
-    event.stopPropagation();
-    const { id, x, y } = event.detail;
-    const isNodeSelected = $selectedNodes.includes(id);
-
-    if (!isNodeSelected) {
-      selectedNodes.set([id]);
-    }
-
-    contextMenuPosition = { x, y };
-    isContextMenuVisible = true;
-
-    if ($selectedNodes.length > 1) {
-      contextMenuNodeId = null;
-      colorPickerContext = 'multipleNodes';
-
-      contextMenuOptions = [
-        {
-          label: `change.color.for.${$selectedNodes.length}.nodes`,
-          action: () => {
-            showColorPicker = true;
-          },
-        },
-        {
-          label: `lock.${$selectedNodes.length}.nodes`,
-          action: () => {
-            lockNodes(nodes, $selectedNodes);
-            isContextMenuVisible = false;
-          },
-        },
-        {
-          label: `unlock.${$selectedNodes.length}.nodes`,
-          action: () => {
-            unlockNodes(nodes, $selectedNodes);
-            isContextMenuVisible = false;
-          },
-        },
-        {
-          label: `delete.${$selectedNodes.length}.nodes`,
-          action: () => {
-            nodes.update((currentNodes) =>
-              currentNodes.filter((node) => !$selectedNodes.includes(node.id))
-            );
-            isContextMenuVisible = false;
-          },
-        },
-      ];
-    } else {
-      contextMenuNodeId = id;
-      colorPickerContext = 'node';
-
-      const node = $nodes.find((n) => n.id === id);
-      initialColor = node.props.color || '#3498db';
-
-      contextMenuOptions = [
-        {
-          label: 'duplicate.node',
-          action: () => {
-            duplicateNode(id);
-            isContextMenuVisible = false;
-          },
-        },
-        {
-          label: 'change.color',
-          action: () => {
-            showColorPicker = true;
-          },
-        },
-        {
-          label: 'edit.node',
-          action: () => {
-            editNodeLabel(id);
-            isContextMenuVisible = false;
-          },
-        },
-        {
-          label: 'delete.node',
-          action: () => {
-            nodes.update((currentNodes) => currentNodes.filter((node) => node.id !== id));
-            isContextMenuVisible = false;
-          },
-        },
-        ...(node.props.isLocked
-          ? [{
-              label: 'unlock.node',
-              action: () => {
-                unlockNodes(nodes, [id]);
-                isContextMenuVisible = false;
-              },
-            }]
-          : [{
-              label: 'lock.node',
-              action: () => {
-                lockNodes(nodes, [id]);
-                isContextMenuVisible = false;
-              },
-            }]
-        ),
-      ];
-    }
-  }
-
-  function handleCanvasContextMenu(event) {
-    event.stopPropagation();
-    const { x, y } = event.detail;
-    contextMenuPosition = { x, y };
-    isContextMenuVisible = true;
-    contextMenuNodeId = null;
-    colorPickerContext = 'canvas';
-
-    selectedNodes.set([]); // Clear selection when right-clicking on canvas
-
-    contextMenuOptions = [
-      {
-        label: 'add.node',
-        action: () => {
-          createNodeAtPosition(x, y);
-          isContextMenuVisible = false;
-        },
-      },
-      {
-        label: 'change.canvas.color',
-        action: () => {
-          showColorPicker = true;
-        },
-      },
-      {
-        label: 'lock.all.nodes',
-        action: () => {
-          lockAllNodes(nodes);
-          isContextMenuVisible = false;
-        },
-      },
-      {
-        label: 'unlock.all.nodes',
-        action: () => {
-          unlockAllNodes(nodes);
-          isContextMenuVisible = false;
-        },
-      },
-    ];
-  }
-
-  function createNodeAtPosition(x, y) {
-    const defaultNodeType = 'Node';
-    handleCreateNode({ detail: { type: defaultNodeType, x, y } });
-    isContextMenuVisible = false;
-  }
 
   // Canvas background colors for light and dark modes
   let canvasBackgroundColorLight = '#f0f0f0';
@@ -438,28 +138,6 @@
 
   let areNodesLocked = false;
 
-  function editNodeLabel(id) {
-    const node = $nodes.find((n) => n.id === id);
-    openModal({
-      title: 'edit.node',
-      message: 'add a new label:',
-      placeholder: 'new.label',
-      confirmText: '.save',
-      inputValue: node.props.label,
-      nodeId: id,
-      action: updateNodeLabel,
-    });
-    isContextMenuVisible = false;
-  }
-
-  function updateNodeLabel(id, newNodeLabel) {
-    nodes.update((currentNodes) =>
-      currentNodes.map((n) =>
-        n.id === id ? { ...n, props: { ...n.props, label: newNodeLabel } } : n
-      )
-    );
-  }
-
   function duplicateNode(originalId) {
     const originalNode = $nodes.find((node) => node.id === originalId);
     if (originalNode) {
@@ -478,12 +156,43 @@
     }
   }
 
-  function handleCanvasClick() {
+  function handleContextMenuClose() {
     isContextMenuVisible = false;
-    selectedNodes.set([]); // Clear selection when clicking on canvas
     showColorPicker = false;
   }
 
+  function handleUpdateColorPicker(event) {
+    showColorPicker = event.detail;
+  }
+
+  function handleNodeContextMenuWrapper(event) {
+    console.log('Node context menu triggered:', event.detail);
+    const result = handleNodeContextMenu(event);
+    console.log('Context menu result:', result);
+    contextMenuPosition = result.contextMenuPosition;
+    contextMenuOptions = result.contextMenuOptions;
+    isContextMenuVisible = result.isContextMenuVisible;
+    contextMenuNodeId = result.contextMenuNodeId;
+    colorPickerContext = result.colorPickerContext;
+    console.log('Context menu state after update:', { isContextMenuVisible, contextMenuOptions, contextMenuPosition });
+  }
+  
+  function handleCanvasContextMenuWrapper(event) {
+    console.log('Canvas context menu triggered:', event.detail);
+    const result = handleCanvasContextMenu(event);
+    console.log('Canvas context menu result:', result);
+    contextMenuPosition = result.contextMenuPosition;
+    contextMenuOptions = result.contextMenuOptions;
+    isContextMenuVisible = result.isContextMenuVisible;
+    contextMenuNodeId = result.contextMenuNodeId;
+    colorPickerContext = result.colorPickerContext;
+    console.log('Context menu state after update:', { isContextMenuVisible, contextMenuOptions, contextMenuPosition });
+  }
+
+  function handleCanvasClickWrapper() {
+    console.log('Canvas click detected');
+    handleContextMenuClose();
+  }
 </script>
 
 <div class="app-container" class:dark-mode={$darkMode}>
@@ -517,8 +226,8 @@
         {nodes}
         canvasBackgroundColor={$darkMode ? canvasBackgroundColorDark : canvasBackgroundColorLight}
         on:createNode={handleCreateNode}
-        on:canvasClick={handleCanvasClick}
-        on:canvasContextMenu={handleCanvasContextMenu}
+        on:canvasClick={handleCanvasClickWrapper}
+        on:canvasContextMenu={handleCanvasContextMenuWrapper}
       >
         {#each $nodes as node (node.id)}
           <svelte:component
@@ -528,7 +237,7 @@
             on:move={handleNodeMove}
             on:createNode={handleCreateNode}
             on:contentUpdate={handleContentUpdate}
-            on:contextmenu={handleNodeContextMenu}
+            on:contextmenu={handleNodeContextMenuWrapper}
             on:nodeClick={handleNodeClick}
           />
         {/each}
@@ -543,8 +252,8 @@
       placeholder={modalPlaceholder}
       confirmText={modalConfirmText}
       bind:inputValue={modalInputValue}
-      on:confirm={handleModalConfirm}
-      on:cancel={handleModalCancel}
+      on:confirm={(event) => Object.assign(this, handleModalConfirm(event, modalAction, modalNodeId))}
+      on:cancel={() => Object.assign(this, handleModalCancel())}
     />
   {/if}
 
@@ -555,7 +264,8 @@
       y={contextMenuPosition.y}
       {initialColor}
       {showColorPicker}
-      on:close={handleCanvasClick}
+      on:close={handleContextMenuClose}
+      on:updateColorPicker={handleUpdateColorPicker}
       on:colorSelected={handleColorSelected}
     />
   {/if}

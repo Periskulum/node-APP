@@ -18,24 +18,23 @@
   $: selectedNodesLength = $selectedNodes.length;
 
   function handleOptionClick(event, option) {
-    event.stopPropagation(); // Prevent event from bubbling up
-    console.log('Option clicked:', option.label); // Debug log
-    if (option.label === 'change.color' || option.label === 'change.canvas.color') {
-      showColorPicker = true;
+    event.stopPropagation();
+    console.log('Option clicked:', option.label);
+    if (option.label.includes('change.color') || option.label === 'change.canvas.color') {
+      dispatch('updateColorPicker', true);
     } else {
-      showColorPicker = false;
-      option.action();
-      if (selectedNodesLength <= 1) {
+      dispatch('updateColorPicker', false);
+      const result = option.action();
+      if (result && result.isContextMenuVisible === false) {
         dispatch('close');
-        showColorPicker = false;
       }
     }
   }
 
   function handleClickOutside(event) {
     if (menu && !menu.contains(event.target)) {
-      console.log('Click outside detected, closing context menu'); // Debug log
-      showColorPicker = false; // Hide the color picker if it was open
+      console.log('Click outside detected, closing context menu');
+      dispatch('updateColorPicker', false);
       dispatch('close');
     }
   }
@@ -49,19 +48,20 @@
   });
 
   function confirmColor(event) {
-    event.stopPropagation(); // Prevent event from bubbling up
-    console.log('Color confirmed:', selectedColor); // Debug log
+    event.stopPropagation();
+    console.log('Color confirmed:', selectedColor);
     dispatch('colorSelected', selectedColor);
     dispatch('close');
   }
+
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
   class="context-menu"
   class:dark-mode={$darkMode}
   bind:this={menu}
   style="left: {x}px; top: {y}px;"
-  on:click|stopPropagation
   role="menu"
   tabindex="0"
 >
@@ -96,7 +96,7 @@
   .context-menu {
     display: flex;
     flex-direction: column;
-    position: absolute;
+    position: fixed;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -167,10 +167,4 @@
     font-size: 24px;
   }
 
-  /* Ensure the context menu doesn't overflow the viewport */
-  .context-menu {
-    max-width: calc(100vw - 20px);
-    max-height: calc(100vh - 20px);
-    overflow: auto;
-  }
 </style>
