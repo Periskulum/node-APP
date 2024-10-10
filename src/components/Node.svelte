@@ -27,10 +27,12 @@
   $: isDarkMode = $darkMode;
 
   function handleMouseDown(event) {
-    if (isNonFunctional || isFactoryNode || isLocked) return;
+    if (isNonFunctional || isFactoryNode) return;
     if (event.button === 0) {
       dispatch('nodeClick', { id, ctrlKey: event.ctrlKey || event.metaKey });
-      startDragging(event);
+      if (!isLocked) {
+        startDragging(event);
+      }
       event.stopPropagation();
     }
   }

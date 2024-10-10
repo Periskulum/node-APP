@@ -12,20 +12,30 @@
   let selectedColor = initialColor;
   const dispatch = createEventDispatcher();
 
+  import { selectedNodes } from '../stores/selectionStore.js';
+  let selectedNodesLength = 0;
+
+  $: selectedNodesLength = $selectedNodes.length;
+
   function handleOptionClick(event, option) {
     event.stopPropagation(); // Prevent event from bubbling up
     console.log('Option clicked:', option.label); // Debug log
     if (option.label === 'change.color' || option.label === 'change.canvas.color') {
       showColorPicker = true;
     } else {
+      showColorPicker = false;
       option.action();
-      dispatch('close');
+      if (selectedNodesLength <= 1) {
+        dispatch('close');
+        showColorPicker = false;
+      }
     }
   }
 
   function handleClickOutside(event) {
     if (menu && !menu.contains(event.target)) {
       console.log('Click outside detected, closing context menu'); // Debug log
+      showColorPicker = false; // Hide the color picker if it was open
       dispatch('close');
     }
   }

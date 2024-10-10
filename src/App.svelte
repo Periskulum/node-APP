@@ -41,6 +41,21 @@
     );
   }
 
+  function handleNodeClick(event) {
+    const { id, ctrlKey } = event.detail;
+    selectedNodes.update((currentSelection) => {
+      if (ctrlKey) {
+        if (currentSelection.includes(id)) {
+          return currentSelection.filter((nodeId) => nodeId !== id);
+        } else {
+          return [...currentSelection, id];
+        }
+      } else {
+        return [id];
+      }
+    });
+  }
+
   // Initialize nextNodeId based on the current highest node ID
   let nextNodeId;
   $: {
@@ -181,7 +196,6 @@
     }
   }
 
-
   // Modal state
   let isModalVisible = false;
   let modalTitle = '';
@@ -224,25 +238,6 @@
   let showColorPicker = false;
   let colorPickerContext = '';
 
-  function handleNodeClick(event) {
-    const { id, ctrlKey } = event.detail;
-    selectedNodes.update((currentSelection) => {
-      if (ctrlKey) {
-        if (currentSelection.includes(id)) {
-          return currentSelection.filter((nodeId) => nodeId !== id);
-        } else {
-          return [...currentSelection, id];
-        }
-      } else {
-        return [id];
-      }
-    });
-  }
-
-  function handleBoxSelect(event) {
-    const { selectedNodeIds } = event.detail;
-    selectedNodes.set(selectedNodeIds);
-  }
 
   function handleNodeContextMenu(event) {
     event.stopPropagation();
@@ -278,6 +273,15 @@
           label: `unlock.${$selectedNodes.length}.nodes`,
           action: () => {
             unlockNodes(nodes, $selectedNodes);
+            isContextMenuVisible = false;
+          },
+        },
+        {
+          label: `delete.${$selectedNodes.length}.nodes`,
+          action: () => {
+            nodes.update((currentNodes) =>
+              currentNodes.filter((node) => !$selectedNodes.includes(node.id))
+            );
             isContextMenuVisible = false;
           },
         },
@@ -317,6 +321,22 @@
             isContextMenuVisible = false;
           },
         },
+        ...(node.props.isLocked
+          ? [{
+              label: 'unlock.node',
+              action: () => {
+                unlockNodes(nodes, [id]);
+                isContextMenuVisible = false;
+              },
+            }]
+          : [{
+              label: 'lock.node',
+              action: () => {
+                lockNodes(nodes, [id]);
+                isContextMenuVisible = false;
+              },
+            }]
+        ),
       ];
     }
   }
@@ -461,7 +481,9 @@
   function handleCanvasClick() {
     isContextMenuVisible = false;
     selectedNodes.set([]); // Clear selection when clicking on canvas
+    showColorPicker = false;
   }
+
 </script>
 
 <div class="app-container" class:dark-mode={$darkMode}>
@@ -470,6 +492,7 @@
     tabindex="0"
     class="node-factory-tab"
     on:click={toggleNodeFactory}
+    on:keydown={(e) => e.key === 'Enter' && toggleNodeFactory()} 
     style="transform: translateX({nodeFactoryWidth}vw); transition: transform {animationDuration}ms ease;"
   >
     node.factory
@@ -496,7 +519,6 @@
         on:createNode={handleCreateNode}
         on:canvasClick={handleCanvasClick}
         on:canvasContextMenu={handleCanvasContextMenu}
-        on:boxSelect={handleBoxSelect}
       >
         {#each $nodes as node (node.id)}
           <svelte:component
