@@ -1,4 +1,4 @@
-# Svelte Flow Web App
+# Svelte Node Web App
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -20,7 +20,7 @@
 
 ## Introduction
 
-Svelte Flow Web App is an interactive, node-based application built with Svelte and Vite. It allows users to create, manipulate, and connect various types of nodes in a canvas-like environment. This project demonstrates the power and flexibility of Svelte for building complex, interactive user interfaces.
+Svelte Node Web App is an interactive, node-based application built with Svelte and Vite. It allows users to create, manipulate, and connect various types of nodes in a canvas-like environment. This project demonstrates the power and flexibility of Svelte for building complex, interactive user interfaces.
 
 ## Features
 
