@@ -1,6 +1,18 @@
+/**
+ * Node Handlers Module
+ * 
+ * This module contains functions to handle various node-related events such as moving nodes,
+ * clicking nodes, creating new nodes, and updating node content. It also includes helper functions
+ * for creating new nodes and generating unique node IDs.
+ */
+
 import { nodes } from '../stores/nodes.js';
 import { selectedNodes } from '../stores/selectionStore.js';
 
+/**
+ * Handle node move event
+ * @param {Object} event - The event object containing node id and new coordinates
+ */
 export function handleNodeMove(event) {
   const { id, x, y } = event.detail;
   nodes.update((currentNodes) =>
@@ -10,21 +22,31 @@ export function handleNodeMove(event) {
   );
 }
 
+/**
+ * Handle node click event
+ * @param {Object} event - The event object containing node id and control key status
+ */
 export function handleNodeClick(event) {
   const { id, ctrlKey } = event.detail;
   selectedNodes.update((currentSelection) => {
     if (ctrlKey) {
+      // If ctrlKey is pressed, toggle selection of the node
       if (currentSelection.includes(id)) {
         return currentSelection.filter((nodeId) => nodeId !== id);
       } else {
         return [...currentSelection, id];
       }
     } else {
+      // If ctrlKey is not pressed, select only the clicked node
       return [id];
     }
   });
 }
 
+/**
+ * Handle create node event
+ * @param {Object} event - The event object containing node type, coordinates, and additional properties
+ */
 export function handleCreateNode(event) {
   const { type, x, y, ...props } = event.detail;
   const newNode = createNewNode(type, x, y, props);
@@ -33,6 +55,14 @@ export function handleCreateNode(event) {
   }
 }
 
+/**
+ * Create a new node
+ * @param {string} type - The type of the node
+ * @param {number} x - The x-coordinate of the node
+ * @param {number} y - The y-coordinate of the node
+ * @param {Object} props - Additional properties for the node
+ * @returns {Object|null} - The new node object or null if the type is unknown
+ */
 function createNewNode(type, x, y, props) {
   const id = getNextNodeId();
   const baseProps = {
@@ -99,7 +129,7 @@ function createNewNode(type, x, y, props) {
         component: 'CalculatorNode',
         props: {
           label: 'calc.node',
-          color: props.color || '#3498db',
+          color: props.color || '#9b59b6', // Default purple color for CalculatorNode
           ...baseProps,
         },
       };
@@ -119,6 +149,10 @@ function createNewNode(type, x, y, props) {
   }
 }
 
+/**
+ * Generate the next unique node ID
+ * @returns {number} - The next node ID
+ */
 function getNextNodeId() {
   let highestId = 0;
   nodes.update((currentNodes) => {
@@ -128,6 +162,10 @@ function getNextNodeId() {
   return highestId + 1;
 }
 
+/**
+ * Handle content update event
+ * @param {Object} event - The event object containing node id and updated properties
+ */
 export function handleContentUpdate(event) {
   const { id, ...updatedProps } = event.detail;
   nodes.update((currentNodes) =>

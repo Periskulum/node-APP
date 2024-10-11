@@ -1,9 +1,11 @@
 <script>
+  // Import necessary functions and stores from Svelte and other modules
   import { createEventDispatcher } from 'svelte';
   import { getNextZIndex } from '../stores/zIndex.js';
   import { darkMode } from '../stores/darkMode.js';
   import { selectedNodes } from '../stores/selectionStore.js';
 
+  // Define component props
   export let x = 0;
   export let y = 0;
   export let tasks = [];
@@ -16,8 +18,10 @@
   export let color = '';
   export let isLocked = false;
 
+  // Create event dispatcher
   const dispatch = createEventDispatcher();
 
+  // Local state variables
   let isDragging = false;
   let startX, startY;
   let zIndex = getNextZIndex();
@@ -26,9 +30,11 @@
   let newPriority = 'low';
   let newDueDate = '';
 
+  // Reactive statements
   $: isSelected = $selectedNodes.includes(id);
   $: isDarkMode = $darkMode;
 
+  // Handle mouse down event for dragging and selecting nodes
   function handleMouseDown(event) {
     if (isNonFunctional || isFactoryNode) return;
     if (event.button === 0) {
@@ -40,6 +46,7 @@
     }
   }
 
+  // Start dragging the node
   function startDragging(event) {
     if (!isEditing && event.target.closest('.todo-node')) {
       isDragging = true;
@@ -51,6 +58,7 @@
     }
   }
 
+  // Handle mouse move event to update node position
   function handleMouseMove(event) {
     if (isDragging) {
       const newX = event.clientX - startX;
@@ -61,6 +69,7 @@
     }
   }
 
+  // Handle mouse up event to stop dragging
   function handleMouseUp(event) {
     if (isDragging) {
       isDragging = false;
@@ -68,6 +77,7 @@
     }
   }
 
+  // Toggle edit mode
   function toggleEdit() {
     if (isNonFunctional) return;
     isEditing = !isEditing;
@@ -76,6 +86,7 @@
     }
   }
 
+  // Add a new task to the list
   function addTask() {
     if (newTask.trim()) {
       const updatedTasks = [...tasks, { text: newTask, priority: newPriority, dueDate: newDueDate }];
@@ -86,25 +97,30 @@
     }
   }
 
+  // Remove a task from the list
   function removeTask(index) {
     const updatedTasks = tasks.filter((_, i) => i !== index);
     updateTasks(updatedTasks);
   }
 
+  // Update tasks and dispatch content update event
   function updateTasks(updatedTasks) {
     dispatch('contentUpdate', { id, tasks: updatedTasks });
   }
 
+  // Dispatch content update event
   function dispatchContentUpdate() {
     dispatch('contentUpdate', { id, title, tasks });
   }
 
+  // Handle context menu event
   function handleContextMenu(event) {
     event.preventDefault();
     dispatch('contextmenu', { id, x: event.clientX, y: event.clientY });
   }
 </script>
 
+<!-- Main container for the todo node -->
 <div
   class="todo-node"
   role="group"
@@ -120,6 +136,7 @@
   on:pointercancel={handleMouseUp}
   on:contextmenu|stopPropagation={handleContextMenu}
 >
+  <!-- Header section with title and edit button -->
   <div class="header">
     <span>todo.node</span>
     <button on:click={toggleEdit} disabled={isNonFunctional}>
@@ -129,6 +146,8 @@
     </button>
   </div>
   <h3>{title}</h3>
+  
+  <!-- Edit mode input fields -->
   {#if isEditing && !isNonFunctional}
     <input
       bind:value={title}
@@ -155,6 +174,8 @@
       <button on:click={addTask}>Add Task</button>
     </div>
   {/if}
+  
+  <!-- Task list -->
   <ul class="task-list">
     {#each tasks as task, index}
       <li class="task-item {task.priority}">
@@ -173,6 +194,7 @@
 </div>
 
 <style>
+  /* Styles for the todo node component */
   .todo-node {
     position: absolute;
     background-color: #3498db;
@@ -189,10 +211,12 @@
     min-height: 150px;
   }
 
+  /* Dark mode styles */
   .dark-mode {
     background-color: #2980b9;
   }
 
+  /* Selected node styles */
   .selected {
     box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
@@ -201,10 +225,12 @@
     box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
+  /* Hover styles */
   .todo-node:hover {
     box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
+  /* Header styles */
   .header {
     display: flex;
     justify-content: space-between;
@@ -218,6 +244,7 @@
     margin-bottom: 8px;
   }
 
+  /* Title input styles */
   .title-input {
     width: calc(100% - 16px);
     background-color: rgba(255, 255, 255, 0.1);
@@ -230,6 +257,7 @@
     margin-bottom: 8px;
   }
 
+  /* Add task form styles */
   .add-task-form {
     display: flex;
     gap: 8px;
@@ -266,6 +294,7 @@
     font-size: 18px;
   }
 
+  /* Task list styles */
   .task-list {
     list-style-type: none;
     padding: 0;
@@ -300,10 +329,12 @@
     color: #ecf0f1;
   }
 
+  /* Factory node styles */
   .factory-node {
     position: relative;
   }
 
+  /* Non-functional node styles */
   .non-functional {
     pointer-events: none;
   }

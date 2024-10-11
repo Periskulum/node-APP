@@ -1,4 +1,5 @@
 <script>
+  // Import necessary Svelte functions and components
   import { onMount } from 'svelte';
   import Canvas from './components/Canvas.svelte';
   import Node from './components/Node.svelte';
@@ -24,23 +25,72 @@
   import { handleNodeMove, handleNodeClick, handleCreateNode, handleContentUpdate } from './utils/nodeHandlers.js';
   import { handleNodeContextMenu, handleCanvasContextMenu, handleCanvasClick } from './utils/contextMenuHandlers.js';
   import { openModal, handleModalConfirm, handleModalCancel, editNodeLabel } from './utils/modalHandlers.js';
+  import { nodeFactoryWidth } from './stores/nodeFactoryStore.js';
 
+  // State variables
   let isNodeFactoryOpen = false;
-  let nodeFactoryWidth = 0;
-  let animationDuration = 300; // ms
+  let isDraggingTab = false;
+  let startX;
+  let tabElement;
+  let dragThreshold = 5; // Pixels to move before considering it a drag
+  let dragStartX;
 
-  function toggleNodeFactory() {
-    isNodeFactoryOpen = !isNodeFactoryOpen;
-    nodeFactoryWidth = isNodeFactoryOpen ? 25 : 0;
+  let lastNodeFactoryWidth = 25; // Default width
+
+  // Function to toggle the node factory panel
+  function toggleNodeFactory(event) {
+    if (!isDraggingTab) {
+      isNodeFactoryOpen = !isNodeFactoryOpen;
+      if (isNodeFactoryOpen) {
+        nodeFactoryWidth.set(lastNodeFactoryWidth);
+      } else {
+        lastNodeFactoryWidth = $nodeFactoryWidth;
+        nodeFactoryWidth.set(0);
+      }
+    }
   }
 
-  // Initialize nextNodeId based on the current highest node ID
+  // Handle mouse down event on the tab
+  function handleTabMouseDown(event) {
+    if (event.button === 0) { // Left mouse button
+      dragStartX = event.clientX;
+      startX = event.clientX;
+      event.preventDefault();
+    }
+  }
+
+  // Handle mouse move event for dragging the tab
+  function handleMouseMove(event) {
+    if (event.buttons === 1) { // Left mouse button is pressed and over tab element
+      const deltaX = event.clientX;
+      if (!isDraggingTab && Math.abs(deltaX) > dragThreshold && event.target === tabElement) {
+        isDraggingTab = true;
+      }
+      if (isDraggingTab) {
+        const newWidth = (event.clientX / window.innerWidth) * 100;
+        nodeFactoryWidth.set(Math.max(10, Math.min(50, newWidth)));
+      }
+    }
+  }
+
+  // Handle mouse up event to stop dragging
+  function handleMouseUp(event) {
+    if (event.button === 0) { // Left mouse button
+      if (!isDraggingTab && Math.abs(event.clientX - startX) <= dragThreshold) {
+        toggleNodeFactory(event);
+      }
+      isDraggingTab = false;
+    }
+  }
+
+  // Compute the next node ID
   let nextNodeId;
   $: {
     const nodeIds = $nodes.map((node) => node.id);
     nextNodeId = nodeIds.length > 0 ? Math.max(...nodeIds) + 1 : 1;
   }
 
+  // Create a list of searchable nodes
   $: searchableNodes = $nodes.map((node) => ({
     id: node.id,
     label: node.props.label || node.props.title || `node.${node.id}`,
@@ -48,6 +98,7 @@
     y: node.props.y,
   }));
 
+  // Function to get the appropriate node component
   function getNodeComponent(componentName) {
     switch (componentName) {
       case 'Node':
@@ -69,7 +120,7 @@
     }
   }
 
-  // Modal state
+  // Modal state variables
   let isModalVisible = false;
   let modalTitle = '';
   let modalMessage = '';
@@ -79,7 +130,7 @@
   let modalNodeId = null;
   let modalAction = null;
 
-  // Context menu handling
+  // Context menu state variables
   let contextMenuOptions = [];
   let contextMenuPosition = { x: 0, y: 0 };
   let isContextMenuVisible = false;
@@ -88,11 +139,11 @@
   let showColorPicker = false;
   let colorPickerContext = '';
 
-  // Canvas background colors for light and dark modes
+  // Canvas background colors
   let canvasBackgroundColorLight = '#f0f0f0';
   let canvasBackgroundColorDark = '#1a1a1a';
 
-  // Initialize canvas background colors from localStorage
+  // Load saved canvas colors from local storage
   if (typeof window !== 'undefined') {
     const savedCanvasColorLight = localStorage.getItem('canvasBackgroundColorLight');
     if (savedCanvasColorLight) {
@@ -104,6 +155,7 @@
     }
   }
 
+  // Handle color selection from the color picker
   function handleColorSelected(event) {
     const newColor = event.detail;
 
@@ -136,8 +188,10 @@
     showColorPicker = false;
   }
 
+  // State variable to track if nodes are locked
   let areNodesLocked = false;
 
+  // Function to duplicate a node
   function duplicateNode(originalId) {
     const originalNode = $nodes.find((node) => node.id === originalId);
     if (originalNode) {
@@ -156,15 +210,18 @@
     }
   }
 
+  // Function to close the context menu
   function handleContextMenuClose() {
     isContextMenuVisible = false;
     showColorPicker = false;
   }
 
+  // Handle update event for the color picker
   function handleUpdateColorPicker(event) {
     showColorPicker = event.detail;
   }
 
+  // Wrapper function for handling node context menu
   function handleNodeContextMenuWrapper(event) {
     console.log('Node context menu triggered:', event.detail);
     const result = handleNodeContextMenu(event);
@@ -177,6 +234,7 @@
     console.log('Context menu state after update:', { isContextMenuVisible, contextMenuOptions, contextMenuPosition });
   }
   
+  // Wrapper function for handling canvas context menu
   function handleCanvasContextMenuWrapper(event) {
     console.log('Canvas context menu triggered:', event.detail);
     const result = handleCanvasContextMenu(event);
@@ -189,37 +247,42 @@
     console.log('Context menu state after update:', { isContextMenuVisible, contextMenuOptions, contextMenuPosition });
   }
 
+  // Wrapper function for handling canvas click
   function handleCanvasClickWrapper() {
     console.log('Canvas click detected');
     handleContextMenuClose();
   }
 </script>
 
+<svelte:window on:mousemove={handleMouseMove} on:mouseup={handleMouseUp} />
+
 <div class="app-container" class:dark-mode={$darkMode}>
   <div
+    bind:this={tabElement}
     role="tab"
     tabindex="0"
     class="node-factory-tab"
-    on:click={toggleNodeFactory}
-    on:keydown={(e) => e.key === 'Enter' && toggleNodeFactory()} 
-    style="transform: translateX({nodeFactoryWidth}vw); transition: transform {animationDuration}ms ease;"
+    class:open={isNodeFactoryOpen}
+    class:dragging={isDraggingTab}
+    on:mousedown={handleTabMouseDown}
+    style="left: {$nodeFactoryWidth}vw;"
   >
     node.factory
   </div>
   <div class="content-container">
     <div
       class="node-factory"
-      style="width: {nodeFactoryWidth}vw; transition: width {animationDuration}ms ease;"
+      style="width: {$nodeFactoryWidth}vw;"
     >
       <NodeFactory on:createNode={handleCreateNode} />
     </div>
     <div
       class="separator"
-      style="left: {nodeFactoryWidth}vw; transition: left {animationDuration}ms ease;"
+      style="left: {$nodeFactoryWidth}vw;"
     ></div>
     <div
       class="canvas-container"
-      style="width: calc(100vw - {nodeFactoryWidth}vw); transition: width {animationDuration}ms ease;"
+      style="width: calc(100vw - {$nodeFactoryWidth}vw); left: {$nodeFactoryWidth}vw;"
     >
       <Canvas
         {searchableNodes}
@@ -272,7 +335,6 @@
 </div>
 
 <style>
-  /* Import Material Icons */
   @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
   .app-container {
@@ -291,7 +353,6 @@
   .node-factory-tab {
     position: fixed;
     top: 50%;
-    left: 0;
     background-color: #3498db;
     color: white;
     padding: 10px 5px;
@@ -302,15 +363,26 @@
     writing-mode: vertical-rl;
     text-orientation: mixed;
     font-size: 14px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    transition: left 0.1s ease-out;
+  }
+
+  .node-factory-tab.open {
+    cursor: col-resize;
+  }
+
+  .node-factory-tab.dragging {
+    pointer-events: none;
   }
 
   .node-factory {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
     background-color: #f0f0f0;
     overflow: hidden;
     border-right: 2px solid #3498db;
-    transition: width 0.3s ease, background-color 0.3s ease;
-    height: 100%;
+    transition: width 0.1s ease-out;
   }
 
   .separator {
@@ -319,15 +391,16 @@
     bottom: 0;
     width: 2px;
     background-color: #3498db;
-    transition: left 0.3s ease, background-color 0.3s ease;
+    transition: left 0.1s ease-out;
   }
 
   .canvas-container {
-    flex-grow: 1;
+    position: absolute;
+    top: 0;
     height: 100%;
+    transition: width 0.1s ease-out, left 0.1s ease-out;
   }
 
-  /* Dark mode styles */
   .dark-mode .node-factory-tab {
     background-color: #2980b9;
   }

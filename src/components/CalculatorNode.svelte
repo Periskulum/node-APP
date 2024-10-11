@@ -10,7 +10,7 @@
   export let isSelected = false;
   export let isFactoryNode = false;
   export let isNonFunctional = false;
-  export let color = "";
+  export let color = "#9b59b6"; // Default purple color
   export let label = "";
   export let isLocked = false;
 
@@ -116,6 +116,7 @@
     width: 200px;
     word-wrap: break-word;
     font-size: large;
+    background-color: #9b59b6; /* Default purple color */
   }
 
   .dark-mode {
@@ -158,7 +159,7 @@
     width: 100%;
     padding: 4px;
     margin-bottom: 8px;
-    background-color: #3498db;
+    background-color: #8e44ad;
     color: white;
     border: none;
     border-radius: 4px;
@@ -167,7 +168,7 @@
 
   .result {
     font-weight: bold;
-    background-color: black;
+    background-color: rgba(0, 0, 0, 0.2);
     border-radius: 6px;
     padding: 8px;
   }

@@ -1,3 +1,10 @@
+/**
+ * contextMenuHandlers.js
+ * 
+ * This module handles context menu interactions for nodes and the canvas.
+ * It includes functions to handle context menu events, create nodes, and duplicate nodes.
+ */
+
 import { nodes } from '../stores/nodes.js';
 import { selectedNodes } from '../stores/selectionStore.js';
 import { get } from 'svelte/store';
@@ -5,18 +12,25 @@ import { lockNodes, unlockNodes, lockAllNodes, unlockAllNodes } from './NodeMana
 import { handleCreateNode } from './nodeHandlers.js';
 import { panX, panY } from '../stores/panStore.js';
 
+/**
+ * Handles the context menu event for a node.
+ * @param {Event} event - The context menu event.
+ */
 export function handleNodeContextMenu(event) {
   console.log('handleNodeContextMenu called with event:', event);
   const { id, x, y } = event.detail;
   const isNodeSelected = get(selectedNodes).includes(id);
 
+  // Select the node if it is not already selected
   if (!isNodeSelected) {
     selectedNodes.set([id]);
   }
 
-  const contextMenuPosition = { x, y };
+  const nodeFactoryWidth = document.querySelector('.node-factory').offsetWidth;
+  const contextMenuPosition = { x: x, y };
   const isContextMenuVisible = true;
 
+  // Handle context menu options for multiple selected nodes
   if (get(selectedNodes).length > 1) {
     console.log('Multiple nodes selected');
     const contextMenuNodeId = null;
@@ -61,6 +75,7 @@ export function handleNodeContextMenu(event) {
 
     return { contextMenuOptions, contextMenuPosition, isContextMenuVisible, contextMenuNodeId, colorPickerContext };
   } else {
+    // Handle context menu options for a single selected node
     console.log('Single node selected');
     const contextMenuNodeId = id;
     const colorPickerContext = 'node';
@@ -112,15 +127,21 @@ export function handleNodeContextMenu(event) {
   }
 }
 
+/**
+ * Handles the context menu event for the canvas.
+ * @param {Event} event - The context menu event.
+ */
 export function handleCanvasContextMenu(event) {
   console.log('handleCanvasContextMenu called with event:', event);
   const { x, y } = event.detail;
-  const contextMenuPosition = { x, y };
+  const nodeFactoryWidth = document.querySelector('.node-factory').offsetWidth;
+  const contextMenuPosition = { x: x + nodeFactoryWidth, y };
   const isContextMenuVisible = true;
   const contextMenuNodeId = null;
   const colorPickerContext = 'canvas';
 
-  selectedNodes.set([]); // Clear selection when right-clicking on canvas
+  // Clear selected nodes
+  selectedNodes.set([]);
 
   const contextMenuOptions = [
     {
@@ -159,6 +180,11 @@ export function handleCanvasContextMenu(event) {
   return { contextMenuOptions, contextMenuPosition, isContextMenuVisible, contextMenuNodeId, colorPickerContext };
 }
 
+/**
+ * Creates a node at the specified position.
+ * @param {number} x - The x-coordinate.
+ * @param {number} y - The y-coordinate.
+ */
 function createNodeAtPosition(x, y) {
   console.log('Creating node at position:', { x, y });
   const currentPanX = get(panX);
@@ -170,12 +196,19 @@ function createNodeAtPosition(x, y) {
   handleCreateNode({ detail: { type: defaultNodeType, x: adjustedX, y: adjustedY } });
 }
 
+/**
+ * Handles the canvas click event.
+ */
 export function handleCanvasClick() {
   console.log('handleCanvasClick called');
   selectedNodes.set([]);
   return { isContextMenuVisible: false, showColorPicker: false };
 }
 
+/**
+ * Duplicates a node by creating a copy with a new ID.
+ * @param {number} originalId - The ID of the node to duplicate.
+ */
 function duplicateNode(originalId) {
   const originalNode = get(nodes).find((node) => node.id === originalId);
   if (originalNode) {

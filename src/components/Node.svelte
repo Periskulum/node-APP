@@ -1,10 +1,19 @@
 <!-- src/components/Node.svelte -->
+<!-- 
+  Node Component
+  - Imports necessary modules and stores
+  - Defines props and reactive variables
+  - Handles mouse events for dragging and context menu
+  - Renders the node with dynamic styles and classes
+-->
+
 <script>
   import { createEventDispatcher } from 'svelte';
   import { darkMode } from '../stores/darkMode.js';
   import { getNextZIndex } from '../stores/zIndex.js';
   import { selectedNodes } from '../stores/selectionStore.js';
 
+  // Props
   export let x = 0;
   export let y = 0;
   export let label = '';
@@ -17,15 +26,19 @@
   export let color = '#3498db';
   export let isLocked = false;
 
+  // Local state
   let isDragging = false;
   let startX, startY;
   let zIndex = getNextZIndex();
 
+  // Event dispatcher
   const dispatch = createEventDispatcher();
 
+  // Reactive statements
   $: isSelected = $selectedNodes.includes(id);
   $: isDarkMode = $darkMode;
 
+  // Handle mouse down event
   function handleMouseDown(event) {
     if (isNonFunctional || isFactoryNode) return;
     if (event.button === 0) {
@@ -37,6 +50,7 @@
     }
   }
 
+  // Start dragging the node
   function startDragging(event) {
     isDragging = true;
     startX = event.clientX - x;
@@ -45,6 +59,7 @@
     event.target.setPointerCapture(event.pointerId);
   }
 
+  // Handle mouse move event
   function handleMouseMove(event) {
     if (isDragging) {
       const newX = event.clientX - startX;
@@ -55,6 +70,7 @@
     }
   }
 
+  // Handle mouse up event
   function handleMouseUp(event) {
     if (isDragging) {
       isDragging = false;
@@ -62,12 +78,14 @@
     }
   }
 
+  // Handle context menu event
   function handleContextMenu(event) {
     event.preventDefault();
     dispatch('contextmenu', { id, x: event.clientX, y: event.clientY });
   }
 </script>
 
+<!-- Node element with dynamic styles and classes -->
 <div
   class="node"
   role="group"
@@ -86,6 +104,7 @@
 </div>
 
 <style>
+  /* Node styles */
   .node {
     position: absolute;
     color: white;
@@ -102,10 +121,12 @@
     font-size: large;
   }
 
+  /* Dark mode styles */
   .dark-mode {
     color: #eee;
   }
 
+  /* Selected node styles */
   .selected.dark-mode {
     box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
@@ -119,14 +140,17 @@
     box-shadow: inset;
   }
 
+  /* Hover styles */
   .node:hover {
     box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
+  /* Factory node styles */
   .factory-node {
     position: relative;
   }
 
+  /* Non-functional node styles */
   .non-functional {
     pointer-events: none;
   }

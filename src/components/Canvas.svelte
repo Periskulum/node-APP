@@ -136,8 +136,11 @@
 
   function handleNodeSelect(event) {
     const { x, y } = event.detail;
-    panX.set(width / 2 - x);
-    panY.set(height / 2 - y);
+    const nodeFactoryWidth = document.querySelector('.node-factory')?.offsetWidth || 0;
+    const centerX = (window.innerWidth - nodeFactoryWidth) / 2;
+    const centerY = window.innerHeight / 2;
+    panX.set(centerX - x);
+    panY.set(centerY - y);
     drawGrid();
     updateNodesPosition();
   }

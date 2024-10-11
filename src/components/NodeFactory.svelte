@@ -1,4 +1,5 @@
 <script>
+  // Import necessary Svelte functions and components
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import { darkMode } from '../stores/darkMode.js';
   import { nodes } from '../stores/nodes.js';
@@ -9,12 +10,16 @@
   import CalculatorNode from './CalculatorNode.svelte';
   import ImageNode from './ImageNode.svelte';
   import TodoNode from './TodoNode.svelte';
+  import { nodeFactoryWidth } from '../stores/nodeFactoryStore.js';
 
+  // Create an event dispatcher
   const dispatch = createEventDispatcher();
 
+  // Constants for initial node positions
   const TOP_MARGIN = 20;
   const LEFT_MARGIN = 30;
 
+  // Function to get initial nodes
   function getInitialNodes() {
     return [
       { id: 'factory-2', component: MakeNode, props: { x: LEFT_MARGIN + 100, y: TOP_MARGIN, label: 'make.node', width: 180, height: 80 } },
@@ -27,6 +32,7 @@
     ];
   }
 
+  // Initialize state variables
   let factoryNodes = getInitialNodes();
   let factoryBounds;
   let isPanning = false;
@@ -37,6 +43,7 @@
   let startX = 0;
   let startY = 0;
 
+  // Handle canvas mouse down event for panning
   function handleCanvasMouseDown(event) {
     if (event.button === 1) {
       isPanning = true;
@@ -45,6 +52,7 @@
     }
   }
 
+  // Handle node mouse down event for dragging
   function handleNodeMouseDown(event, id) {
     if (event.button === 1) {
       isDraggingNode = true;
@@ -57,6 +65,7 @@
     }
   }
 
+  // Handle window mouse move event for dragging and panning
   function handleWindowMouseMove(event) {
     if (isDraggingNode && draggedNodeId) {
       const newX = event.clientX - startX;
@@ -69,6 +78,7 @@
     }
   }
 
+  // Handle window mouse up event to stop dragging and panning
   function handleWindowMouseUp(event) {
     if (event.button === 1) {
       isDraggingNode = false;
@@ -77,29 +87,49 @@
     }
   }
 
+  // Add event listeners on mount
   onMount(() => {
     window.addEventListener('mousemove', handleWindowMouseMove);
     window.addEventListener('mouseup', handleWindowMouseUp);
   });
 
+  // Remove event listeners on destroy
   onDestroy(() => {
     window.removeEventListener('mousemove', handleWindowMouseMove);
     window.removeEventListener('mouseup', handleWindowMouseUp);
   });
 
+  // Reset node positions to initial state
   function resetNodePositions() {
     factoryNodes = getInitialNodes();
     panY = 0;
   }
 
+  // Handle drag start event for nodes
   function handleDragStart(event, node) {
     event.dataTransfer.setData('text/plain', JSON.stringify({
       type: node.component.name.toLowerCase().replace('proxy<', '').replace('>', ''),
       ...node.props
     }));
     event.dataTransfer.effectAllowed = 'copy';
+
+    // Create a custom drag image
+    const dragImage = event.target.cloneNode(true);
+    dragImage.style.position = 'absolute';
+    dragImage.style.top = '-1000px';
+    dragImage.style.opacity = '1'; // Make it fully opaque
+    document.body.appendChild(dragImage);
+
+    // Set the custom drag image
+    event.dataTransfer.setDragImage(dragImage, 0, 0);
+
+    // Remove the custom drag image after a short delay
+    setTimeout(() => {
+      document.body.removeChild(dragImage);
+    }, 0);
   }
 
+  // Clear local storage and reset states
   function clearLocalStorage() {
     localStorage.clear();
     nodes.set([]);
@@ -108,7 +138,9 @@
   }
 </script>
 
+<!-- Main container for the node factory -->
 <div class="node-factory-content" bind:this={factoryBounds}>
+  <!-- Header section with title and buttons -->
   <div class="node-factory-header">
     <h2>node.factory</h2>
     <div class="header-buttons">
@@ -120,6 +152,7 @@
       </button>
     </div>
   </div>
+  <!-- Canvas area for nodes -->
   <div class="factory-canvas"
        on:mousedown={handleCanvasMouseDown}
        on:mouseleave={handleWindowMouseUp}>
@@ -144,12 +177,14 @@
 </div>
 
 <style>
+  /* Styles for the main container */
   .node-factory-content {
     height: 100%;
     display: flex;
     flex-direction: column;
   }
 
+  /* Styles for the header section */
   .node-factory-header {
     background-color: #3498db;
     color: white;
@@ -180,6 +215,7 @@
     justify-content: center;
   }
 
+  /* Styles for the canvas area */
   .factory-canvas {
     flex-grow: 1;
     position: relative;
@@ -200,6 +236,7 @@
     pointer-events: auto;
   }
 
+  /* Dark mode styles */
   :global(.dark-mode) .node-factory-header {
     background-color: #2980b9;
   }

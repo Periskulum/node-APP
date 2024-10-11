@@ -1,5 +1,4 @@
-# Svelte Node Web App
-
+# node.app
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Features](#features)
@@ -11,16 +10,16 @@
 5. [Usage](#usage)
 6. [Components](#components)
 7. [State Management](#state-management)
-8. [Styling](#styling)
-9. [Build and Deployment](#build-and-deployment)
-10. [Contributing](#contributing)
-11. [License](#license)
-12. [Acknowledgements](#acknowledgements)
+8. [Detailed Component Interactions](#detailed-component-interactions)
+9. [Styling](#styling)
+10. [Build and Deployment](#build-and-deployment)
+11. [Contributing](#contributing)
+12. [License](#license)
+13. [Acknowledgements](#acknowledgements)
 
 
 ## Introduction
-
-Svelte Node Web App is an interactive, node-based application built with Svelte and Vite. It allows users to create, manipulate, and connect various types of nodes in a canvas-like environment. This project demonstrates the power and flexibility of Svelte for building complex, interactive user interfaces.
+node.app is an interactive, node-based application built with Svelte and Vite. It allows users to create, manipulate, and connect various types of nodes in a canvas-like environment. This project demonstrates the power and flexibility of Svelte for building complex, interactive user interfaces.
 
 ## Features
 
@@ -58,7 +57,7 @@ The application is designed to be responsive, ensuring a seamless experience acr
 ## Project Structure
 
 ```
-svelte-flow-webapp/
+node-APP/
 ├── src/
 │   ├── components/
 │   │   ├── Canvas.svelte
@@ -137,60 +136,60 @@ The application will be available at `http://localhost:5173` (or another port if
 
 ## Components
 
-### Canvas.svelte
-The main canvas component for rendering and managing nodes. It handles the layout and interactions of all nodes.
-
-### Node.svelte
-The base node component. It provides the fundamental structure and behavior for all node types.
-
-### DarkNode.svelte
-A node for toggling dark mode. It changes the application's theme between light and dark modes.
-
-### MakeNode.svelte
-A node for creating new nodes. It provides an interface for users to select node types and configure their properties.
-
-### TextNode.svelte
-A node for displaying and editing text content. It includes a text area for user input and displays the content on the canvas.
-
-### ImageNode.svelte
-A node for displaying images. Users can specify an image URL, and the node will render the image on the canvas.
-
-### CalculatorNode.svelte
-A node with basic calculator functionalities. It allows users to perform simple arithmetic operations.
-
-### TodoNode.svelte
-A node for managing a todo list. Users can add, edit, and delete tasks, and set due dates and priorities.
-
-### ContextMenu.svelte
-A context menu for node and canvas interactions. It provides additional options such as deleting nodes, editing properties, and more.
-
-### Modal.svelte
-A reusable modal component. It can be used for various purposes, such as displaying forms or additional information.
-
-### NodeFactory.svelte
-A component for creating and managing node types. It provides an interface for users to select node types and configure their properties.
-
-### SearchBar.svelte
-A search functionality for finding nodes. It allows users to quickly locate and navigate to specific nodes on the canvas.
+- **Canvas.svelte**: Main canvas component for rendering and managing nodes.
+- **Node.svelte**: Base node component providing structure and behavior for all node types.
+- **DarkNode.svelte**: Toggles dark mode, changing the application's theme.
+- **MakeNode.svelte**: Interface for creating new nodes with configurable properties.
+- **TextNode.svelte**: Displays and edits text content with a text area.
+- **ImageNode.svelte**: Renders images specified by URL.
+- **CalculatorNode.svelte**: Performs basic arithmetic operations.
+- **TodoNode.svelte**: Manages a todo list with task management features.
+- **ContextMenu.svelte**: Provides additional options for node and canvas interactions.
+- **Modal.svelte**: Reusable component for displaying forms or information.
+- **NodeFactory.svelte**: Manages node types and their properties.
+- **SearchBar.svelte**: Allows quick location and navigation to specific nodes.
 
 ## State Management
 
-The application uses Svelte stores for state management:
+The application uses Svelte stores:
 
-### nodes.js
-Manages the state of all nodes on the canvas. It includes functions for adding, updating, and deleting nodes, and persists the state in local storage.
+- **nodes.js**: Manages node state, including adding, updating, deleting, and persisting in local storage.
+- **darkMode.js**: Toggles the theme between light and dark modes.
+- **panStore.js**: Tracks canvas position for panning and zooming.
+- **selectionStore.js**: Tracks selected nodes and manages selection state.
+- **zIndex.js**: Ensures correct node layering based on z-index.
 
-### darkMode.js
-Manages the dark mode state. It provides functions for toggling the theme between light and dark modes.
+## Detailed Component Interactions
 
-### panStore.js
-Manages the canvas panning state. It tracks the position of the canvas and provides functions for panning and zooming.
+### Communication
 
-### selectionStore.js
-Manages the state of selected nodes. It tracks which nodes are currently selected and provides functions for selecting and deselecting nodes.
+#### Parent-Child Communication
+- **Canvas.svelte**: Acts as the parent component, managing the layout and interactions of all nodes. It passes down properties and event handlers to child components like **Node.svelte**.
+- **NodeFactory.svelte**: Communicates with **Canvas.svelte** to add new nodes. It emits events that **Canvas.svelte** listens to for creating nodes.
 
-### zIndex.js
-Manages the z-index of nodes for proper layering. It ensures that nodes are rendered in the correct order based on their z-index.
+#### Data Flow
+- **Node.svelte**: Receives data from **Canvas.svelte** and updates its state based on user interactions. It can also emit events to notify **Canvas.svelte** of changes.
+- **SearchBar.svelte**: Emits events to **Canvas.svelte** to highlight or navigate to specific nodes.
+
+### Event Handling
+
+#### Emitted Events
+- **Node.svelte**: Emits events like `nodeMove`, `nodeClick`, and `nodeDelete` to **Canvas.svelte**.
+- **Canvas.svelte**: Listens for events from **Node.svelte** and **NodeFactory.svelte** to update the state of the canvas and nodes.
+
+#### Event Handling in Parent Components
+- **Canvas.svelte**: Handles events emitted by **Node.svelte** to update the position, selection, or deletion of nodes. It also handles events from **NodeFactory.svelte** to add new nodes.
+
+### State Changes
+
+#### State Dependencies
+- **nodes.js**: The central store for managing the state of all nodes. Changes in this store affect all components that depend on node data.
+- **darkMode.js**: Affects the theme of the entire application. Components like **DarkNode.svelte** can toggle this state, affecting the appearance of all components.
+
+#### Propagation of State Changes
+- When a node's position or properties are updated in **Node.svelte**, these changes are propagated to **Canvas.svelte** and then to the **nodes.js** store.
+- Changes in the **nodes.js** store are reflected across all components that subscribe to this store, ensuring a consistent state throughout the application.
+
 
 ## Styling
 

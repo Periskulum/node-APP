@@ -1,5 +1,11 @@
+/* 
+  CSS for the main body element
+  - Reset margin and padding
+  - Hide overflow
+*/
+
 body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+  overflow: hidden; /* Prevent scrolling */
 }

@@ -1,9 +1,11 @@
 <script>
+  // Import necessary functions and stores from Svelte and local files
   import { createEventDispatcher } from 'svelte';
   import { getNextZIndex } from '../stores/zIndex.js';
   import { darkMode } from '../stores/darkMode.js';
   import { selectedNodes } from '../stores/selectionStore.js';
 
+  // Exported props for the component
   export let x = 0;
   export let y = 0;
   export let content = 'hello.world';
@@ -17,16 +19,20 @@
   export let color = "";
   export let isLocked = false;
 
+  // Create an event dispatcher
   const dispatch = createEventDispatcher();
 
+  // Local state variables
   let isDragging = false;
   let startX, startY;
   let zIndex = getNextZIndex();
   let isEditing = false;
 
+  // Reactive statements
   $: isSelected = $selectedNodes.includes(id);
   $: isDarkMode = $darkMode;
 
+  // Handle mouse down event for dragging and selection
   function handleMouseDown(event) {
     if (isNonFunctional || isFactoryNode) return;
     if (event.button === 0) {
@@ -38,6 +44,7 @@
     }
   }
 
+  // Start dragging the node
   function startDragging(event) {
     if (!isEditing && event.target.closest('.text-node')) {
       isDragging = true;
@@ -48,6 +55,7 @@
     }
   }
 
+  // Handle mouse move event for dragging
   function handleMouseMove(event) {
     if (isDragging) {
       const newX = event.clientX - startX;
@@ -58,6 +66,7 @@
     }
   }
 
+  // Handle mouse up event to stop dragging
   function handleMouseUp(event) {
     if (isDragging) {
       isDragging = false;
@@ -65,6 +74,7 @@
     }
   }
 
+  // Toggle editing mode
   function toggleEdit() {
     if (isNonFunctional) return;
     isEditing = !isEditing;
@@ -73,12 +83,14 @@
     }
   }
 
+  // Handle context menu event
   function handleContextMenu(event) {
     event.preventDefault();
     dispatch('contextmenu', { id, x: event.clientX, y: event.clientY });
   }
 </script>
 
+<!-- Main container for the text node -->
 <div
   class="text-node"
   role="group"
@@ -93,6 +105,7 @@
   on:pointercancel={handleMouseUp}
   on:contextmenu|stopPropagation={handleContextMenu}
 >
+  <!-- Header section with title and edit button -->
   <div class="header">
     <span>text.node</span>
     <button on:click={toggleEdit} disabled={isNonFunctional}>
@@ -101,6 +114,8 @@
       </span>
     </button>
   </div>
+
+  <!-- Conditional rendering for editing mode -->
   {#if isEditing && !isNonFunctional}
     <input
       bind:value={title}
@@ -115,6 +130,7 @@
 </div>
 
 <style>
+  /* Styles for the text node */
   .text-node {
     position: absolute;
     background-color: #3498db;
@@ -133,10 +149,12 @@
     overflow: visible;
   }
 
+  /* Dark mode styles */
   .dark-mode {
     background-color: #2980b9;
   }
 
+  /* Styles for selected state */
   .selected {
     box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
@@ -149,6 +167,7 @@
     box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
+  /* Header styles */
   .header {
     display: flex;
     justify-content: space-between;
@@ -162,6 +181,7 @@
     margin-bottom: 8px;
   }
 
+  /* Input styles */
   .title-input {
     width: calc(100% - 16px);
     background-color: rgba(255, 255, 255, 0.1);
@@ -191,6 +211,7 @@
     font-size: 18px;
   }
 
+  /* Textarea and content styles */
   textarea, .content {
     width: calc(100% - 16px);
     min-height: 100px;
@@ -213,10 +234,12 @@
     word-break: break-word;
   }
 
+  /* Factory node styles */
   .factory-node {
     position: relative;
   }
 
+  /* Non-functional node styles */
   .non-functional {
     pointer-events: none;
   }
