@@ -5,7 +5,7 @@
  * Import the writable function from Svelte's store module.
  * The writable function is used to create a writable store.
  */
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
 /**
  * Create a writable store named nodeFactoryWidth.

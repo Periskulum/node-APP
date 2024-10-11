@@ -1,9 +1,9 @@
 <script>
   // Import necessary functions and stores from Svelte and other modules
-  import { createEventDispatcher } from 'svelte';
-  import { getNextZIndex } from '../stores/zIndex.js';
-  import { darkMode } from '../stores/darkMode.js';
-  import { selectedNodes } from '../stores/selectionStore.js';
+  import { createEventDispatcher } from "svelte";
+  import { getNextZIndex } from "../stores/zIndex.js";
+  import { darkMode } from "../stores/darkMode.js";
+  import { selectedNodes } from "../stores/selectionStore.js";
 
   // Define component props with default values
   export let x = 0;
@@ -19,7 +19,7 @@
   export let isLocked = false;
 
   // Local state variables
-  let inputValue = '';
+  let inputValue = "";
   const dispatch = createEventDispatcher();
   let isDragging = false;
   let startX, startY;
@@ -32,14 +32,19 @@
   // Function to handle form submission
   function handleSubmit() {
     if (!isNonFunctional && inputValue.trim()) {
-      dispatch('createNode', { type: 'node', label: inputValue.trim(), x: x + 200, y: y + 50 });
-      inputValue = '';
+      dispatch("createNode", {
+        type: "node",
+        label: inputValue.trim(),
+        x: x + 200,
+        y: y + 50,
+      });
+      inputValue = "";
     }
   }
 
   // Function to handle keydown events
   function handleKeydown(event) {
-    if (!isNonFunctional && event.key === 'Enter') {
+    if (!isNonFunctional && event.key === "Enter") {
       handleSubmit();
     }
   }
@@ -48,7 +53,7 @@
   function handleMouseDown(event) {
     if (isNonFunctional || isFactoryNode) return;
     if (event.button === 0) {
-      dispatch('nodeClick', { id, ctrlKey: event.ctrlKey || event.metaKey });
+      dispatch("nodeClick", { id, ctrlKey: event.ctrlKey || event.metaKey });
       if (!isLocked) {
         startDragging(event);
       }
@@ -62,7 +67,7 @@
     startX = event.clientX - x;
     startY = event.clientY - y;
     zIndex = getNextZIndex();
-    dispatch('select');
+    dispatch("select");
     event.target.setPointerCapture(event.pointerId);
   }
 
@@ -73,7 +78,7 @@
       const newY = event.clientY - startY;
       x = newX;
       y = newY;
-      dispatch('move', { id, x: newX, y: newY });
+      dispatch("move", { id, x: newX, y: newY });
     }
   }
 
@@ -88,7 +93,7 @@
   // Function to handle context menu events
   function handleContextMenu(event) {
     event.preventDefault();
-    dispatch('contextmenu', { id, x: event.clientX, y: event.clientY });
+    dispatch("contextmenu", { id, x: event.clientX, y: event.clientY });
   }
 </script>
 
@@ -101,7 +106,9 @@
   class:factory-node={isFactoryNode}
   class:non-functional={isNonFunctional}
   class:locked={isLocked}
-  style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode ? 0 : y}px; z-index: {zIndex}; background-color: {color}; width:{width}; height:{height}; label:{label};"
+  style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode
+    ? 0
+    : y}px; z-index: {zIndex}; background-color: {color}; width:{width}; height:{height}; label:{label};"
   on:pointerdown|stopPropagation={handleMouseDown}
   on:pointermove={handleMouseMove}
   on:pointerup={handleMouseUp}
@@ -135,7 +142,9 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     pointer-events: auto;
     touch-action: none;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
     width: 180px;
     display: flex;
     flex-direction: column;
@@ -149,16 +158,22 @@
 
   /* Selected node styling */
   .selected {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .selected.dark-mode {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   /* Hover effect */
   .make-node:hover {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   /* Label styling */
@@ -205,7 +220,8 @@
   }
 
   /* Disabled input and button styling */
-  input:disabled, button:disabled {
+  input:disabled,
+  button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }

@@ -1,16 +1,16 @@
 <script>
   // Import necessary Svelte functions and components
-  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
-  import { darkMode } from '../stores/darkMode.js';
-  import { nodes } from '../stores/nodes.js';
-  import Node from './Node.svelte';
-  import MakeNode from './MakeNode.svelte';
-  import DarkNode from './DarkNode.svelte';
-  import TextNode from './TextNode.svelte';
-  import CalculatorNode from './CalculatorNode.svelte';
-  import ImageNode from './ImageNode.svelte';
-  import TodoNode from './TodoNode.svelte';
-  import { nodeFactoryWidth } from '../stores/nodeFactoryStore.js';
+  import { createEventDispatcher, onMount, onDestroy } from "svelte";
+  import { darkMode } from "../stores/darkMode.js";
+  import { nodes } from "../stores/nodes.js";
+  import Node from "./Node.svelte";
+  import MakeNode from "./MakeNode.svelte";
+  import DarkNode from "./DarkNode.svelte";
+  import TextNode from "./TextNode.svelte";
+  import CalculatorNode from "./CalculatorNode.svelte";
+  import ImageNode from "./ImageNode.svelte";
+  import TodoNode from "./TodoNode.svelte";
+  import { nodeFactoryWidth } from "../stores/nodeFactoryStore.js";
 
   // Create an event dispatcher
   const dispatch = createEventDispatcher();
@@ -22,13 +22,76 @@
   // Function to get initial nodes
   function getInitialNodes() {
     return [
-      { id: 'factory-2', component: MakeNode, props: { x: LEFT_MARGIN + 100, y: TOP_MARGIN, label: 'make.node', width: 180, height: 80 } },
-      { id: 'factory-3', component: DarkNode, props: { x: LEFT_MARGIN, y: TOP_MARGIN, label: 'dark.node', width: 80, height: 80 } },
-      { id: 'factory-1', component: Node, props: { x: LEFT_MARGIN + 320, y: TOP_MARGIN, label: 'basic.node', width: 80, height: 40 } },
-      { id: 'factory-4', component: TextNode, props: { x: LEFT_MARGIN, y: TOP_MARGIN + 100, content: 'hello.world', title: 'text.node', width: 300, height: 150 } },
-      { id: 'factory-5', component: ImageNode, props: { x: LEFT_MARGIN, y: TOP_MARGIN + 315, imageUrl: 'https://picsum.photos/200', title: 'image.node' } },
-      { id: 'factory-6', component: CalculatorNode, props: { x: LEFT_MARGIN, y: TOP_MARGIN + 655 } },
-      { id: 'factory-7', component: TodoNode, props: { x: LEFT_MARGIN, y: TOP_MARGIN + 820, title: 'todo.node', tasks: [] } }
+      {
+        id: "factory-2",
+        component: MakeNode,
+        props: {
+          x: LEFT_MARGIN + 100,
+          y: TOP_MARGIN,
+          label: "make.node",
+          width: 180,
+          height: 80,
+        },
+      },
+      {
+        id: "factory-3",
+        component: DarkNode,
+        props: {
+          x: LEFT_MARGIN,
+          y: TOP_MARGIN,
+          label: "dark.node",
+          width: 80,
+          height: 80,
+        },
+      },
+      {
+        id: "factory-1",
+        component: Node,
+        props: {
+          x: LEFT_MARGIN + 320,
+          y: TOP_MARGIN,
+          label: "basic.node",
+          width: 80,
+          height: 40,
+        },
+      },
+      {
+        id: "factory-4",
+        component: TextNode,
+        props: {
+          x: LEFT_MARGIN,
+          y: TOP_MARGIN + 100,
+          content: "hello.world",
+          title: "text.node",
+          width: 300,
+          height: 150,
+        },
+      },
+      {
+        id: "factory-5",
+        component: ImageNode,
+        props: {
+          x: LEFT_MARGIN,
+          y: TOP_MARGIN + 315,
+          imageUrl: "https://picsum.photos/200",
+          title: "image.node",
+        },
+      },
+      {
+        id: "factory-6",
+        component: CalculatorNode,
+        props: { x: LEFT_MARGIN, y: TOP_MARGIN + 655 },
+      },
+      {
+        id: "factory-7",
+        component: TodoNode,
+        props: {
+          x: LEFT_MARGIN,
+          y: TOP_MARGIN + 820,
+          title: "todo.node",
+          tasks: [],
+        },
+      },
     ];
   }
 
@@ -57,7 +120,7 @@
     if (event.button === 1) {
       isDraggingNode = true;
       draggedNodeId = id;
-      const node = factoryNodes.find(n => n.id === id);
+      const node = factoryNodes.find((n) => n.id === id);
       startX = event.clientX - node.props.x;
       startY = event.clientY - node.props.y;
       event.preventDefault();
@@ -70,8 +133,10 @@
     if (isDraggingNode && draggedNodeId) {
       const newX = event.clientX - startX;
       const newY = event.clientY - startY;
-      factoryNodes = factoryNodes.map(node =>
-        node.id === draggedNodeId ? { ...node, props: { ...node.props, x: newX, y: newY } } : node
+      factoryNodes = factoryNodes.map((node) =>
+        node.id === draggedNodeId
+          ? { ...node, props: { ...node.props, x: newX, y: newY } }
+          : node
       );
     } else if (isPanning) {
       panY = event.clientY - startPanY;
@@ -89,14 +154,14 @@
 
   // Add event listeners on mount
   onMount(() => {
-    window.addEventListener('mousemove', handleWindowMouseMove);
-    window.addEventListener('mouseup', handleWindowMouseUp);
+    window.addEventListener("mousemove", handleWindowMouseMove);
+    window.addEventListener("mouseup", handleWindowMouseUp);
   });
 
   // Remove event listeners on destroy
   onDestroy(() => {
-    window.removeEventListener('mousemove', handleWindowMouseMove);
-    window.removeEventListener('mouseup', handleWindowMouseUp);
+    window.removeEventListener("mousemove", handleWindowMouseMove);
+    window.removeEventListener("mouseup", handleWindowMouseUp);
   });
 
   // Reset node positions to initial state
@@ -107,17 +172,23 @@
 
   // Handle drag start event for nodes
   function handleDragStart(event, node) {
-    event.dataTransfer.setData('text/plain', JSON.stringify({
-      type: node.component.name.toLowerCase().replace('proxy<', '').replace('>', ''),
-      ...node.props
-    }));
-    event.dataTransfer.effectAllowed = 'copy';
+    event.dataTransfer.setData(
+      "text/plain",
+      JSON.stringify({
+        type: node.component.name
+          .toLowerCase()
+          .replace("proxy<", "")
+          .replace(">", ""),
+        ...node.props,
+      })
+    );
+    event.dataTransfer.effectAllowed = "copy";
 
     // Create a custom drag image
     const dragImage = event.target.cloneNode(true);
-    dragImage.style.position = 'absolute';
-    dragImage.style.top = '-1000px';
-    dragImage.style.opacity = '1'; // Make it fully opaque
+    dragImage.style.position = "absolute";
+    dragImage.style.top = "-1000px";
+    dragImage.style.opacity = "1"; // Make it fully opaque
     document.body.appendChild(dragImage);
 
     // Set the custom drag image
@@ -134,7 +205,7 @@
     localStorage.clear();
     nodes.set([]);
     darkMode.set(false);
-    alert('Local storage cleared. Refresh the page to see the changes.');
+    alert("Local storage cleared. Refresh the page to see the changes.");
   }
 </script>
 
@@ -144,25 +215,40 @@
   <div class="node-factory-header">
     <h2>node.factory</h2>
     <div class="header-buttons">
-      <button on:click={clearLocalStorage} class="clear-storage-button" title="Clear local storage">
+      <button
+        on:click={clearLocalStorage}
+        class="clear-storage-button"
+        title="Clear local storage"
+      >
         <span class="material-icons">delete_sweep</span>
       </button>
-      <button on:click={resetNodePositions} class="reset-button" title="Reset node positions">
+      <button
+        on:click={resetNodePositions}
+        class="reset-button"
+        title="Reset node positions"
+      >
         <span class="material-icons">restart_alt</span>
       </button>
     </div>
   </div>
   <!-- Canvas area for nodes -->
-  <div class="factory-canvas"
-       on:mousedown={handleCanvasMouseDown}
-       on:mouseleave={handleWindowMouseUp}>
+  <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+  <div
+    class="factory-canvas"
+    on:mousedown={handleCanvasMouseDown}
+    on:mouseleave={handleWindowMouseUp}
+    role="group"
+  >
     <div class="nodes-container" style="transform: translateY({panY}px);">
       {#each factoryNodes as node (node.id)}
-        <div class="factory-node"
-             style="left: {node.props.x}px; top: {node.props.y}px;"
-             on:mousedown={(e) => handleNodeMouseDown(e, node.id)}
-             draggable="true"
-             on:dragstart={(e) => handleDragStart(e, node)}>
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div
+          class="factory-node"
+          style="left: {node.props.x}px; top: {node.props.y}px;"
+          on:mousedown={(e) => handleNodeMouseDown(e, node.id)}
+          draggable="true"
+          on:dragstart={(e) => handleDragStart(e, node)}
+        >
           <svelte:component
             this={node.component}
             {...node.props}

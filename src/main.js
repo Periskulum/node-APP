@@ -1,6 +1,6 @@
 /**
  * Main entry point for the Svelte application.
- * 
+ *
  * - Import CSS styles
  * - Import the main Svelte component
  * - Initialize the Svelte application
@@ -8,10 +8,10 @@
  */
 
 // Import CSS styles
-import './app.css';
+import "./app.css";
 
 // Import the main Svelte component
-import App from './App.svelte';
+import App from "./App.svelte";
 
 // Initialize the Svelte application
 const app = new App({

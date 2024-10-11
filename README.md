@@ -74,6 +74,7 @@ node-APP/
 │   │   └── CalculatorNode.svelte
 │   ├── stores/
 │   │   ├── darkMode.js
+│   │   ├── nodeFactoryStore.js
 │   │   ├── nodes.js
 │   │   ├── panStore.js
 │   │   ├── selectionStore.js

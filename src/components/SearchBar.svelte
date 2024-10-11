@@ -1,14 +1,14 @@
 <script>
   // Import necessary Svelte functions and stores
-  import { createEventDispatcher, tick } from 'svelte';
-  import { fade } from 'svelte/transition';
-  import { darkMode } from '../stores/darkMode.js';
+  import { createEventDispatcher, tick } from "svelte";
+  import { fade } from "svelte/transition";
+  import { darkMode } from "../stores/darkMode.js";
 
   // Exported prop for searchable nodes
   export let searchableNodes = [];
 
   // Local state variables
-  let searchTerm = '';
+  let searchTerm = "";
   let filteredNodes = [];
   let selectedIndex = -1;
   let isVisible = false;
@@ -20,7 +20,7 @@
   // Reactive statement to filter nodes based on search term
   $: {
     if (searchTerm) {
-      filteredNodes = searchableNodes.filter(node =>
+      filteredNodes = searchableNodes.filter((node) =>
         node.label.toLowerCase().includes(searchTerm.toLowerCase())
       );
       isVisible = filteredNodes.length > 0;
@@ -38,17 +38,18 @@
 
   // Handle keydown events for navigation and selection
   async function handleKeydown(event) {
-    if (event.key === 'ArrowDown') {
+    if (event.key === "ArrowDown") {
       event.preventDefault();
       selectedIndex = (selectedIndex + 1) % filteredNodes.length;
       await tick();
       scrollSelectedIntoView();
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      selectedIndex = (selectedIndex - 1 + filteredNodes.length) % filteredNodes.length;
+      selectedIndex =
+        (selectedIndex - 1 + filteredNodes.length) % filteredNodes.length;
       await tick();
       scrollSelectedIntoView();
-    } else if (event.key === 'Enter') {
+    } else if (event.key === "Enter") {
       if (selectedIndex !== -1) {
         selectNode(filteredNodes[selectedIndex]);
       } else if (filteredNodes.length === 1) {
@@ -62,15 +63,18 @@
     if (searchResults && selectedIndex !== -1) {
       const selectedElement = searchResults.children[selectedIndex];
       if (selectedElement) {
-        selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        selectedElement.scrollIntoView({
+          block: "nearest",
+          behavior: "smooth",
+        });
       }
     }
   }
 
   // Dispatch select event and reset search
   function selectNode(node) {
-    dispatch('select', { x: node.x, y: node.y });
-    searchTerm = '';
+    dispatch("select", { x: node.x, y: node.y });
+    searchTerm = "";
     isVisible = false;
   }
 
@@ -78,9 +82,9 @@
   function getNodeLabel(node) {
     if (node.component && node.component.name) {
       const componentName = node.component.name.toLowerCase();
-      if (componentName.includes('textnode')) {
+      if (componentName.includes("textnode")) {
         return `${node.label}.text`;
-      } else if (componentName.includes('imagenode')) {
+      } else if (componentName.includes("imagenode")) {
         return `${node.label}.image`;
       }
     }
@@ -100,9 +104,15 @@
   />
   {#if isVisible}
     <!-- Search results list -->
-    <ul class="search-results" transition:fade={{ duration: 100 }} bind:this={searchResults}>
+    <ul
+      class="search-results"
+      transition:fade={{ duration: 100 }}
+      bind:this={searchResults}
+    >
       {#each filteredNodes as node, index}
         <!-- Search result item -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
         <li
           class:selected={index === selectedIndex}
           on:click={() => selectNode(node)}

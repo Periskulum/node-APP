@@ -1,8 +1,8 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
-  import { darkMode } from '../stores/darkMode.js';
-  import { getNextZIndex } from '../stores/zIndex.js';
-  import { selectedNodes } from '../stores/selectionStore.js';
+  import { createEventDispatcher } from "svelte";
+  import { darkMode } from "../stores/darkMode.js";
+  import { getNextZIndex } from "../stores/zIndex.js";
+  import { selectedNodes } from "../stores/selectionStore.js";
 
   export let x = 0;
   export let y = 0;
@@ -26,14 +26,14 @@
 
   function toggleDarkMode() {
     if (!isNonFunctional) {
-      darkMode.update(mode => !mode);
+      darkMode.update((mode) => !mode);
     }
   }
 
   function handleMouseDown(event) {
     if (isNonFunctional || isFactoryNode) return;
     if (event.button === 0) {
-      dispatch('nodeClick', { id, ctrlKey: event.ctrlKey || event.metaKey });
+      dispatch("nodeClick", { id, ctrlKey: event.ctrlKey || event.metaKey });
       if (!isLocked) {
         startDragging(event);
       }
@@ -55,7 +55,7 @@
       const newY = event.clientY - startY;
       x = newX;
       y = newY;
-      dispatch('move', { id, x: newX, y: newY });
+      dispatch("move", { id, x: newX, y: newY });
     }
   }
 
@@ -68,18 +68,20 @@
 
   function handleContextMenu(event) {
     event.preventDefault();
-    dispatch('contextmenu', { id, x: event.clientX, y: event.clientY });
+    dispatch("contextmenu", { id, x: event.clientX, y: event.clientY });
   }
 </script>
 
 <div
   class="dark-node"
   role="group"
-  label={label}
+  {label}
   class:selected={isSelected}
   class:factory-node={isFactoryNode}
   class:non-functional={isNonFunctional}
-  style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode ? 0 : y}px; z-index: {zIndex}; background-color: {color}; width:{width}; height:{height};"
+  style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode
+    ? 0
+    : y}px; z-index: {zIndex}; background-color: {color}; width:{width}; height:{height};"
   on:pointerdown|stopPropagation={handleMouseDown}
   on:pointermove={handleMouseMove}
   on:pointerup={handleMouseUp}
@@ -88,7 +90,7 @@
 >
   <button on:click={toggleDarkMode} disabled={isNonFunctional}>
     <span class="material-icons">
-      {$darkMode ? 'light_mode' : 'dark_mode'}
+      {$darkMode ? "light_mode" : "dark_mode"}
     </span>
   </button>
 </div>
@@ -105,7 +107,9 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     pointer-events: auto;
     touch-action: none;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
     width: 60px;
     height: 60px;
     display: flex;
@@ -115,11 +119,15 @@
   }
 
   .selected {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .dark-node:hover {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   button {

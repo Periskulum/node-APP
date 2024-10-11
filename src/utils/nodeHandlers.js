@@ -1,13 +1,13 @@
 /**
  * Node Handlers Module
- * 
+ *
  * This module contains functions to handle various node-related events such as moving nodes,
  * clicking nodes, creating new nodes, and updating node content. It also includes helper functions
  * for creating new nodes and generating unique node IDs.
  */
 
-import { nodes } from '../stores/nodes.js';
-import { selectedNodes } from '../stores/selectionStore.js';
+import { nodes } from "../stores/nodes.js";
+import { selectedNodes } from "../stores/selectionStore.js";
 
 /**
  * Handle node move event
@@ -72,79 +72,79 @@ function createNewNode(type, x, y, props) {
     ...props,
   };
   switch (type.toLowerCase()) {
-    case 'node':
+    case "node":
       return {
         id,
-        component: 'Node',
+        component: "Node",
         props: {
           label: props.label || `node.${id}`,
-          color: props.color || '#3498db',
+          color: props.color || "#3498db",
           ...baseProps,
         },
       };
-    case 'makenode':
+    case "makenode":
       return {
         id,
-        component: 'MakeNode',
+        component: "MakeNode",
         props: {
-          label: props.label || 'make.node',
+          label: props.label || "make.node",
           ...baseProps,
         },
       };
-    case 'darknode':
+    case "darknode":
       return {
         id,
-        component: 'DarkNode',
+        component: "DarkNode",
         props: {
-          label: props.label || 'dark.node',
-          color: props.color || '#2c3e50',
+          label: props.label || "dark.node",
+          color: props.color || "#2c3e50",
           ...baseProps,
         },
       };
-    case 'textnode':
+    case "textnode":
       return {
         id,
-        component: 'TextNode',
+        component: "TextNode",
         props: {
-          content: props.content || 'hello.world',
-          title: props.title || 'text.node',
-          color: props.color || '#3498db',
+          content: props.content || "hello.world",
+          title: props.title || "text.node",
+          color: props.color || "#3498db",
           ...baseProps,
         },
       };
-    case 'imagenode':
+    case "imagenode":
       return {
         id,
-        component: 'ImageNode',
+        component: "ImageNode",
         props: {
-          imageUrl: 'https://picsum.photos/300/400',
-          title: 'image.node',
-          color: props.color || '#3498db',
+          imageUrl: "https://picsum.photos/300/400",
+          title: "image.node",
+          color: props.color || "#3498db",
           ...baseProps,
         },
       };
-    case 'calculatornode':
+    case "calculatornode":
       return {
         id,
-        component: 'CalculatorNode',
+        component: "CalculatorNode",
         props: {
-          label: 'calc.node',
-          color: props.color || '#9b59b6', // Default purple color for CalculatorNode
+          label: "calc.node",
+          color: props.color || "#9b59b6", // Default purple color for CalculatorNode
           ...baseProps,
         },
       };
-    case 'todonode':
+    case "todonode":
       return {
         id,
-        component: 'TodoNode',
+        component: "TodoNode",
         props: {
-          label: 'todo.node',
-          color: props.color || '#3498db',
+          label: "todo.node",
+          color: props.color || "#3498db",
           ...baseProps,
         },
       };
     default:
-      console.log('Unknown node type:', type);
+      console.log("Unknown node type:", type);
       return null;
   }
 }

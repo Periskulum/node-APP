@@ -1,15 +1,15 @@
 <script>
   // Import necessary functions and stores from Svelte and other modules
-  import { createEventDispatcher } from 'svelte';
-  import { getNextZIndex } from '../stores/zIndex.js';
-  import { darkMode } from '../stores/darkMode.js';
-  import { selectedNodes } from '../stores/selectionStore.js';
+  import { createEventDispatcher } from "svelte";
+  import { getNextZIndex } from "../stores/zIndex.js";
+  import { darkMode } from "../stores/darkMode.js";
+  import { selectedNodes } from "../stores/selectionStore.js";
 
   // Define component props
   export let x = 0;
   export let y = 0;
-  export let imageUrl = '';
-  export let title = 'image.node';
+  export let imageUrl = "";
+  export let title = "image.node";
   export let isSelected = false;
   export let id;
   export let isFactoryNode = false;
@@ -35,7 +35,7 @@
   function handleMouseDown(event) {
     if (isNonFunctional || isFactoryNode) return;
     if (event.button === 0) {
-      dispatch('nodeClick', { id, ctrlKey: event.ctrlKey || event.metaKey });
+      dispatch("nodeClick", { id, ctrlKey: event.ctrlKey || event.metaKey });
       if (!isLocked) {
         startDragging(event);
       }
@@ -45,7 +45,7 @@
 
   // Start dragging the node
   function startDragging(event) {
-    if (!isEditing && event.target.closest('.image-node')) {
+    if (!isEditing && event.target.closest(".image-node")) {
       isDragging = true;
       startX = event.clientX - x;
       startY = event.clientY - y;
@@ -61,7 +61,7 @@
       const newY = event.clientY - startY;
       x = newX;
       y = newY;
-      dispatch('move', { id, x: newX, y: newY, imageUrl });
+      dispatch("move", { id, x: newX, y: newY, imageUrl });
     }
   }
 
@@ -78,7 +78,7 @@
     if (isNonFunctional) return;
     isEditing = !isEditing;
     if (!isEditing) {
-      dispatch('contentUpdate', { id, imageUrl, title });
+      dispatch("contentUpdate", { id, imageUrl, title });
     }
   }
 
@@ -108,7 +108,7 @@
   // Handle context menu event
   function handleContextMenu(event) {
     event.preventDefault();
-    dispatch('contextmenu', { id, x: event.clientX, y: event.clientY });
+    dispatch("contextmenu", { id, x: event.clientX, y: event.clientY });
   }
 </script>
 
@@ -120,7 +120,9 @@
   class:selected={isSelected}
   class:factory-node={isFactoryNode}
   class:non-functional={isNonFunctional}
-  style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode ? 0 : y}px; z-index: {zIndex}; background-color: {color};"
+  style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode
+    ? 0
+    : y}px; z-index: {zIndex}; background-color: {color};"
   on:pointerdown|stopPropagation={handleMouseDown}
   on:pointermove={handleMouseMove}
   on:pointerup={handleMouseUp}
@@ -132,7 +134,7 @@
     <span>image.node</span>
     <button on:click={toggleEdit} disabled={isNonFunctional}>
       <span class="material-icons">
-        {isEditing ? 'done' : 'edit'}
+        {isEditing ? "done" : "edit"}
       </span>
     </button>
   </div>
@@ -140,11 +142,7 @@
   <div class="title">{title}</div>
   <!-- Editable inputs for title and image URL -->
   {#if isEditing && !isNonFunctional}
-    <input
-      bind:value={title}
-      placeholder="enter.title"
-      class="title-input"
-    />
+    <input bind:value={title} placeholder="enter.title" class="title-input" />
     <input
       bind:value={imageUrl}
       placeholder="enter.image.url"
@@ -180,7 +178,9 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     pointer-events: auto;
     touch-action: none;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
     width: 300px;
     height: 300px;
     overflow: hidden;
@@ -195,15 +195,21 @@
 
   /* Selected state styles */
   .selected {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .selected:hover {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .image-node:hover {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   /* Header styles */
@@ -221,7 +227,8 @@
   }
 
   /* Input styles */
-  .title-input, .url-input {
+  .title-input,
+  .url-input {
     width: calc(100% - 16px);
     background-color: rgba(255, 255, 255, 0.1);
     border: none;
@@ -281,8 +288,12 @@
   }
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 
   /* Factory node styles */

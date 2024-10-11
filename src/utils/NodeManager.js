@@ -12,10 +12,11 @@
  */
 export function lockNodes(nodesStore, nodeIds) {
   nodesStore.update((currentNodes) =>
-    currentNodes.map((node) =>
-      nodeIds.includes(node.id)
-        ? { ...node, props: { ...node.props, isLocked: true } } // Lock the node if its ID is in the nodeIds array
-        : node // Leave the node unchanged if its ID is not in the nodeIds array
+    currentNodes.map(
+      (node) =>
+        nodeIds.includes(node.id)
+          ? { ...node, props: { ...node.props, isLocked: true } } // Lock the node if its ID is in the nodeIds array
+          : node // Leave the node unchanged if its ID is not in the nodeIds array
     )
   );
 }
@@ -27,10 +28,11 @@ export function lockNodes(nodesStore, nodeIds) {
  */
 export function unlockNodes(nodesStore, nodeIds) {
   nodesStore.update((currentNodes) =>
-    currentNodes.map((node) =>
-      nodeIds.includes(node.id)
-        ? { ...node, props: { ...node.props, isLocked: false } } // Unlock the node if its ID is in the nodeIds array
-        : node // Leave the node unchanged if its ID is not in the nodeIds array
+    currentNodes.map(
+      (node) =>
+        nodeIds.includes(node.id)
+          ? { ...node, props: { ...node.props, isLocked: false } } // Unlock the node if its ID is in the nodeIds array
+          : node // Leave the node unchanged if its ID is not in the nodeIds array
     )
   );
 }

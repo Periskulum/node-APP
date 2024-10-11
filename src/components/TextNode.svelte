@@ -1,15 +1,15 @@
 <script>
   // Import necessary functions and stores from Svelte and local files
-  import { createEventDispatcher } from 'svelte';
-  import { getNextZIndex } from '../stores/zIndex.js';
-  import { darkMode } from '../stores/darkMode.js';
-  import { selectedNodes } from '../stores/selectionStore.js';
+  import { createEventDispatcher } from "svelte";
+  import { getNextZIndex } from "../stores/zIndex.js";
+  import { darkMode } from "../stores/darkMode.js";
+  import { selectedNodes } from "../stores/selectionStore.js";
 
   // Exported props for the component
   export let x = 0;
   export let y = 0;
-  export let content = 'hello.world';
-  export let title = 'text.node';
+  export let content = "hello.world";
+  export let title = "text.node";
   export let isSelected = false;
   export let id;
   export let isFactoryNode = false;
@@ -36,7 +36,7 @@
   function handleMouseDown(event) {
     if (isNonFunctional || isFactoryNode) return;
     if (event.button === 0) {
-      dispatch('nodeClick', { id, ctrlKey: event.ctrlKey || event.metaKey });
+      dispatch("nodeClick", { id, ctrlKey: event.ctrlKey || event.metaKey });
       if (!isLocked) {
         startDragging(event);
       }
@@ -46,7 +46,7 @@
 
   // Start dragging the node
   function startDragging(event) {
-    if (!isEditing && event.target.closest('.text-node')) {
+    if (!isEditing && event.target.closest(".text-node")) {
       isDragging = true;
       startX = event.clientX - x;
       startY = event.clientY - y;
@@ -62,7 +62,7 @@
       const newY = event.clientY - startY;
       x = newX;
       y = newY;
-      dispatch('move', { id, x: newX, y: newY });
+      dispatch("move", { id, x: newX, y: newY });
     }
   }
 
@@ -79,14 +79,14 @@
     if (isNonFunctional) return;
     isEditing = !isEditing;
     if (!isEditing) {
-      dispatch('contentUpdate', { id, content, title });
+      dispatch("contentUpdate", { id, content, title });
     }
   }
 
   // Handle context menu event
   function handleContextMenu(event) {
     event.preventDefault();
-    dispatch('contextmenu', { id, x: event.clientX, y: event.clientY });
+    dispatch("contextmenu", { id, x: event.clientX, y: event.clientY });
   }
 </script>
 
@@ -98,7 +98,9 @@
   class:selected={isSelected}
   class:factory-node={isFactoryNode}
   class:non-functional={isNonFunctional}
-  style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode ? 0 : y}px; z-index: {zIndex}; background-color: {color}; width:{width}; height:{height};"
+  style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode
+    ? 0
+    : y}px; z-index: {zIndex}; background-color: {color}; width:{width}; height:{height};"
   on:pointerdown|stopPropagation={handleMouseDown}
   on:pointermove={handleMouseMove}
   on:pointerup={handleMouseUp}
@@ -110,18 +112,14 @@
     <span>text.node</span>
     <button on:click={toggleEdit} disabled={isNonFunctional}>
       <span class="material-icons">
-        {isEditing ? 'done' : 'edit'}
+        {isEditing ? "done" : "edit"}
       </span>
     </button>
   </div>
 
   <!-- Conditional rendering for editing mode -->
   {#if isEditing && !isNonFunctional}
-    <input
-      bind:value={title}
-      placeholder="enter.title"
-      class="title-input"
-    />
+    <input bind:value={title} placeholder="enter.title" class="title-input" />
     <textarea bind:value={content} placeholder="hello.world"></textarea>
   {:else}
     <h3>{title}</h3>
@@ -142,7 +140,9 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     pointer-events: auto;
     touch-action: none;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
     width: 300px;
     min-height: 100px;
     max-height: none;
@@ -156,15 +156,21 @@
 
   /* Styles for selected state */
   .selected {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .selected:hover {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .text-node:hover {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   /* Header styles */
@@ -212,7 +218,8 @@
   }
 
   /* Textarea and content styles */
-  textarea, .content {
+  textarea,
+  .content {
     width: calc(100% - 16px);
     min-height: 100px;
     background-color: rgba(255, 255, 255, 0.1);

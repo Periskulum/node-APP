@@ -1,59 +1,61 @@
 <script>
-  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-  import { darkMode } from '../stores/darkMode.js';
+  import { onMount, onDestroy, createEventDispatcher } from "svelte";
+  import { darkMode } from "../stores/darkMode.js";
 
   export let options = [];
   export let x = 0;
   export let y = 0;
-  export let initialColor = '#3498db';
+  export let initialColor = "#3498db";
   export let showColorPicker = false;
 
   let menu;
   let selectedColor = initialColor;
   const dispatch = createEventDispatcher();
 
-  import { selectedNodes } from '../stores/selectionStore.js';
+  import { selectedNodes } from "../stores/selectionStore.js";
   let selectedNodesLength = 0;
 
   $: selectedNodesLength = $selectedNodes.length;
 
   function handleOptionClick(event, option) {
     event.stopPropagation();
-    console.log('Option clicked:', option.label);
-    if (option.label.includes('change.color') || option.label === 'change.canvas.color') {
-      dispatch('updateColorPicker', true);
+    console.log("Option clicked:", option.label);
+    if (
+      option.label.includes("change.color") ||
+      option.label === "change.canvas.color"
+    ) {
+      dispatch("updateColorPicker", true);
     } else {
-      dispatch('updateColorPicker', false);
+      dispatch("updateColorPicker", false);
       const result = option.action();
       if (result && result.isContextMenuVisible === false) {
-        dispatch('close');
+        dispatch("close");
       }
     }
   }
 
   function handleClickOutside(event) {
     if (menu && !menu.contains(event.target)) {
-      console.log('Click outside detected, closing context menu');
-      dispatch('updateColorPicker', false);
-      dispatch('close');
+      console.log("Click outside detected, closing context menu");
+      dispatch("updateColorPicker", false);
+      dispatch("close");
     }
   }
 
   onMount(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
   });
 
   onDestroy(() => {
-    document.removeEventListener('mousedown', handleClickOutside);
+    document.removeEventListener("mousedown", handleClickOutside);
   });
 
   function confirmColor(event) {
     event.stopPropagation();
-    console.log('Color confirmed:', selectedColor);
-    dispatch('colorSelected', selectedColor);
-    dispatch('close');
+    console.log("Color confirmed:", selectedColor);
+    dispatch("colorSelected", selectedColor);
+    dispatch("close");
   }
-
 </script>
 
 <div
@@ -89,7 +91,7 @@
 </div>
 
 <style>
-  @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+  @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
   .context-menu {
     display: flex;
@@ -100,7 +102,7 @@
     border-radius: 8px;
     z-index: 10000;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     min-width: 150px;
     max-height: 200px;
     overflow-y: auto;
@@ -146,7 +148,7 @@
     width: 150px;
   }
 
-  input[type='color'] {
+  input[type="color"] {
     border: none;
     background: none;
     padding: 0;

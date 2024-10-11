@@ -1,21 +1,21 @@
 <script>
   // Import necessary functions and stores from Svelte and other modules
-  import { createEventDispatcher } from 'svelte';
-  import { getNextZIndex } from '../stores/zIndex.js';
-  import { darkMode } from '../stores/darkMode.js';
-  import { selectedNodes } from '../stores/selectionStore.js';
+  import { createEventDispatcher } from "svelte";
+  import { getNextZIndex } from "../stores/zIndex.js";
+  import { darkMode } from "../stores/darkMode.js";
+  import { selectedNodes } from "../stores/selectionStore.js";
 
   // Define component props
   export let x = 0;
   export let y = 0;
   export let tasks = [];
-  export let label = '';
-  export let title = 'todo.node';
+  export let label = "";
+  export let title = "todo.node";
   export let isSelected = false;
   export let id;
   export let isFactoryNode = false;
   export let isNonFunctional = false;
-  export let color = '';
+  export let color = "";
   export let isLocked = false;
 
   // Create event dispatcher
@@ -26,9 +26,9 @@
   let startX, startY;
   let zIndex = getNextZIndex();
   let isEditing = false;
-  let newTask = '';
-  let newPriority = 'low';
-  let newDueDate = '';
+  let newTask = "";
+  let newPriority = "low";
+  let newDueDate = "";
 
   // Reactive statements
   $: isSelected = $selectedNodes.includes(id);
@@ -38,7 +38,7 @@
   function handleMouseDown(event) {
     if (isNonFunctional || isFactoryNode) return;
     if (event.button === 0) {
-      dispatch('nodeClick', { id, ctrlKey: event.ctrlKey || event.metaKey });
+      dispatch("nodeClick", { id, ctrlKey: event.ctrlKey || event.metaKey });
       if (!isLocked) {
         startDragging(event);
       }
@@ -48,12 +48,12 @@
 
   // Start dragging the node
   function startDragging(event) {
-    if (!isEditing && event.target.closest('.todo-node')) {
+    if (!isEditing && event.target.closest(".todo-node")) {
       isDragging = true;
       startX = event.clientX - x;
       startY = event.clientY - y;
       zIndex = getNextZIndex();
-      dispatch('select');
+      dispatch("select");
       event.target.setPointerCapture(event.pointerId);
     }
   }
@@ -65,7 +65,7 @@
       const newY = event.clientY - startY;
       x = newX;
       y = newY;
-      dispatch('move', { id, x: newX, y: newY });
+      dispatch("move", { id, x: newX, y: newY });
     }
   }
 
@@ -89,11 +89,14 @@
   // Add a new task to the list
   function addTask() {
     if (newTask.trim()) {
-      const updatedTasks = [...tasks, { text: newTask, priority: newPriority, dueDate: newDueDate }];
+      const updatedTasks = [
+        ...tasks,
+        { text: newTask, priority: newPriority, dueDate: newDueDate },
+      ];
       updateTasks(updatedTasks);
-      newTask = '';
-      newPriority = 'low';
-      newDueDate = '';
+      newTask = "";
+      newPriority = "low";
+      newDueDate = "";
     }
   }
 
@@ -105,18 +108,18 @@
 
   // Update tasks and dispatch content update event
   function updateTasks(updatedTasks) {
-    dispatch('contentUpdate', { id, tasks: updatedTasks });
+    dispatch("contentUpdate", { id, tasks: updatedTasks });
   }
 
   // Dispatch content update event
   function dispatchContentUpdate() {
-    dispatch('contentUpdate', { id, title, tasks });
+    dispatch("contentUpdate", { id, title, tasks });
   }
 
   // Handle context menu event
   function handleContextMenu(event) {
     event.preventDefault();
-    dispatch('contextmenu', { id, x: event.clientX, y: event.clientY });
+    dispatch("contextmenu", { id, x: event.clientX, y: event.clientY });
   }
 </script>
 
@@ -124,12 +127,14 @@
 <div
   class="todo-node"
   role="group"
-  label={label}
+  {label}
   class:dark-mode={isDarkMode}
   class:selected={isSelected}
   class:factory-node={isFactoryNode}
   class:non-functional={isNonFunctional}
-  style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode ? 0 : y}px; z-index: {zIndex}; background-color: {color};"
+  style="left: {isFactoryNode ? 0 : x}px; top: {isFactoryNode
+    ? 0
+    : y}px; z-index: {zIndex}; background-color: {color};"
   on:pointerdown|stopPropagation={handleMouseDown}
   on:pointermove={handleMouseMove}
   on:pointerup={handleMouseUp}
@@ -141,12 +146,12 @@
     <span>todo.node</span>
     <button on:click={toggleEdit} disabled={isNonFunctional}>
       <span class="material-icons">
-        {isEditing ? 'done' : 'edit'}
+        {isEditing ? "done" : "edit"}
       </span>
     </button>
   </div>
   <h3>{title}</h3>
-  
+
   <!-- Edit mode input fields -->
   {#if isEditing && !isNonFunctional}
     <input
@@ -166,15 +171,11 @@
         <option value="medium">Medium</option>
         <option value="high">High</option>
       </select>
-      <input
-        type="date"
-        bind:value={newDueDate}
-        class="due-date-input"
-      />
+      <input type="date" bind:value={newDueDate} class="due-date-input" />
       <button on:click={addTask}>Add Task</button>
     </div>
   {/if}
-  
+
   <!-- Task list -->
   <ul class="task-list">
     {#each tasks as task, index}
@@ -206,7 +207,9 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     pointer-events: auto;
     touch-action: none;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
     width: 300px;
     min-height: 150px;
   }
@@ -218,16 +221,22 @@
 
   /* Selected node styles */
   .selected {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   .selected.dark-mode {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   /* Hover styles */
   .todo-node:hover {
-    box-shadow: 0 0 0 3px #41e0f5, 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 0 0 3px #41e0f5,
+      0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
   /* Header styles */
@@ -265,7 +274,8 @@
     flex-wrap: wrap;
   }
 
-  .task-input, .due-date-input {
+  .task-input,
+  .due-date-input {
     flex-grow: 1;
     padding: 4px;
     border-radius: 4px;

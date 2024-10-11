@@ -2,7 +2,7 @@
 // This module provides utility functions to handle modal operations such as opening, confirming, and canceling modals.
 // It also includes a function to edit a node label and update the nodes store.
 
-import { nodes } from '../stores/nodes.js';
+import { nodes } from "../stores/nodes.js";
 
 /**
  * Opens a modal with the specified parameters.
@@ -16,14 +16,22 @@ import { nodes } from '../stores/nodes.js';
  * @param {Function} params.action - The action to perform on confirm.
  * @returns {Object} The modal state.
  */
-export function openModal({ title, message, placeholder, confirmText, inputValue, nodeId, action }) {
+export function openModal({
+  title,
+  message,
+  placeholder,
+  confirmText,
+  inputValue,
+  nodeId,
+  action,
+}) {
   return {
     isModalVisible: true,
     modalTitle: title,
     modalMessage: message,
     modalPlaceholder: placeholder,
-    modalConfirmText: confirmText || 'Confirm',
-    modalInputValue: inputValue || '',
+    modalConfirmText: confirmText || "Confirm",
+    modalInputValue: inputValue || "",
     modalNodeId: nodeId,
     modalAction: action,
   };
@@ -60,10 +68,10 @@ export function handleModalCancel() {
 export function editNodeLabel(id) {
   const node = get(nodes).find((n) => n.id === id);
   return openModal({
-    title: 'edit.node',
-    message: 'add a new label:',
-    placeholder: 'new.label',
-    confirmText: '.save',
+    title: "edit.node",
+    message: "add a new label:",
+    placeholder: "new.label",
+    confirmText: ".save",
     inputValue: node.props.label,
     nodeId: id,
     action: updateNodeLabel,

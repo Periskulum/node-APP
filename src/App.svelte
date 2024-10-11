@@ -1,31 +1,45 @@
 <script>
   // Import necessary Svelte functions and components
-  import { onMount } from 'svelte';
-  import Canvas from './components/Canvas.svelte';
-  import Node from './components/Node.svelte';
-  import MakeNode from './components/MakeNode.svelte';
-  import DarkNode from './components/DarkNode.svelte';
-  import TextNode from './components/TextNode.svelte';
-  import ImageNode from './components/ImageNode.svelte';
-  import CalculatorNode from './components/CalculatorNode.svelte';
-  import TodoNode from './components/TodoNode.svelte';
-  import { darkMode } from './stores/darkMode.js';
-  import NodeFactory from './components/NodeFactory.svelte';
-  import { nodes } from './stores/nodes.js';
-  import ContextMenu from './components/ContextMenu.svelte';
-  import Modal from './components/Modal.svelte';
-  import { selectedNodes } from './stores/selectionStore.js';
-  import { panX, panY } from './stores/panStore.js';
+  import { onMount } from "svelte";
+  import Canvas from "./components/Canvas.svelte";
+  import Node from "./components/Node.svelte";
+  import MakeNode from "./components/MakeNode.svelte";
+  import DarkNode from "./components/DarkNode.svelte";
+  import TextNode from "./components/TextNode.svelte";
+  import ImageNode from "./components/ImageNode.svelte";
+  import CalculatorNode from "./components/CalculatorNode.svelte";
+  import TodoNode from "./components/TodoNode.svelte";
+  import { darkMode } from "./stores/darkMode.js";
+  import NodeFactory from "./components/NodeFactory.svelte";
+  import { nodes } from "./stores/nodes.js";
+  import ContextMenu from "./components/ContextMenu.svelte";
+  import Modal from "./components/Modal.svelte";
+  import { selectedNodes } from "./stores/selectionStore.js";
+  import { panX, panY } from "./stores/panStore.js";
   import {
     lockNodes,
     unlockNodes,
     lockAllNodes,
     unlockAllNodes,
-  } from './utils/NodeManager.js';
-  import { handleNodeMove, handleNodeClick, handleCreateNode, handleContentUpdate } from './utils/nodeHandlers.js';
-  import { handleNodeContextMenu, handleCanvasContextMenu, handleCanvasClick } from './utils/contextMenuHandlers.js';
-  import { openModal, handleModalConfirm, handleModalCancel, editNodeLabel } from './utils/modalHandlers.js';
-  import { nodeFactoryWidth } from './stores/nodeFactoryStore.js';
+  } from "./utils/NodeManager.js";
+  import {
+    handleNodeMove,
+    handleNodeClick,
+    handleCreateNode,
+    handleContentUpdate,
+  } from "./utils/nodeHandlers.js";
+  import {
+    handleNodeContextMenu,
+    handleCanvasContextMenu,
+    handleCanvasClick,
+  } from "./utils/contextMenuHandlers.js";
+  import {
+    openModal,
+    handleModalConfirm,
+    handleModalCancel,
+    editNodeLabel,
+  } from "./utils/modalHandlers.js";
+  import { nodeFactoryWidth } from "./stores/nodeFactoryStore.js";
 
   // State variables
   let isNodeFactoryOpen = false;
@@ -52,7 +66,8 @@
 
   // Handle mouse down event on the tab
   function handleTabMouseDown(event) {
-    if (event.button === 0) { // Left mouse button
+    if (event.button === 0) {
+      // Left mouse button
       dragStartX = event.clientX;
       startX = event.clientX;
       event.preventDefault();
@@ -61,9 +76,14 @@
 
   // Handle mouse move event for dragging the tab
   function handleMouseMove(event) {
-    if (event.buttons === 1) { // Left mouse button is pressed and over tab element
+    if (event.buttons === 1) {
+      // Left mouse button is pressed and over tab element
       const deltaX = event.clientX;
-      if (!isDraggingTab && Math.abs(deltaX) > dragThreshold && event.target === tabElement) {
+      if (
+        !isDraggingTab &&
+        Math.abs(deltaX) > dragThreshold &&
+        event.target === tabElement
+      ) {
         isDraggingTab = true;
       }
       if (isDraggingTab) {
@@ -75,7 +95,8 @@
 
   // Handle mouse up event to stop dragging
   function handleMouseUp(event) {
-    if (event.button === 0) { // Left mouse button
+    if (event.button === 0) {
+      // Left mouse button
       if (!isDraggingTab && Math.abs(event.clientX - startX) <= dragThreshold) {
         toggleNodeFactory(event);
       }
@@ -101,19 +122,19 @@
   // Function to get the appropriate node component
   function getNodeComponent(componentName) {
     switch (componentName) {
-      case 'Node':
+      case "Node":
         return Node;
-      case 'MakeNode':
+      case "MakeNode":
         return MakeNode;
-      case 'DarkNode':
+      case "DarkNode":
         return DarkNode;
-      case 'TextNode':
+      case "TextNode":
         return TextNode;
-      case 'ImageNode':
+      case "ImageNode":
         return ImageNode;
-      case 'CalculatorNode':
+      case "CalculatorNode":
         return CalculatorNode;
-      case 'TodoNode':
+      case "TodoNode":
         return TodoNode;
       default:
         return Node;
@@ -122,11 +143,11 @@
 
   // Modal state variables
   let isModalVisible = false;
-  let modalTitle = '';
-  let modalMessage = '';
-  let modalPlaceholder = '';
-  let modalConfirmText = 'Confirm';
-  let modalInputValue = '';
+  let modalTitle = "";
+  let modalMessage = "";
+  let modalPlaceholder = "";
+  let modalConfirmText = "Confirm";
+  let modalInputValue = "";
   let modalNodeId = null;
   let modalAction = null;
 
@@ -135,21 +156,25 @@
   let contextMenuPosition = { x: 0, y: 0 };
   let isContextMenuVisible = false;
   let contextMenuNodeId = null;
-  let initialColor = '#3498db';
+  let initialColor = "#3498db";
   let showColorPicker = false;
-  let colorPickerContext = '';
+  let colorPickerContext = "";
 
   // Canvas background colors
-  let canvasBackgroundColorLight = '#f0f0f0';
-  let canvasBackgroundColorDark = '#1a1a1a';
+  let canvasBackgroundColorLight = "#f0f0f0";
+  let canvasBackgroundColorDark = "#1a1a1a";
 
   // Load saved canvas colors from local storage
-  if (typeof window !== 'undefined') {
-    const savedCanvasColorLight = localStorage.getItem('canvasBackgroundColorLight');
+  if (typeof window !== "undefined") {
+    const savedCanvasColorLight = localStorage.getItem(
+      "canvasBackgroundColorLight"
+    );
     if (savedCanvasColorLight) {
       canvasBackgroundColorLight = savedCanvasColorLight;
     }
-    const savedCanvasColorDark = localStorage.getItem('canvasBackgroundColorDark');
+    const savedCanvasColorDark = localStorage.getItem(
+      "canvasBackgroundColorDark"
+    );
     if (savedCanvasColorDark) {
       canvasBackgroundColorDark = savedCanvasColorDark;
     }
@@ -159,15 +184,15 @@
   function handleColorSelected(event) {
     const newColor = event.detail;
 
-    if (colorPickerContext === 'canvas') {
+    if (colorPickerContext === "canvas") {
       if ($darkMode) {
         canvasBackgroundColorDark = newColor;
-        localStorage.setItem('canvasBackgroundColorDark', newColor);
+        localStorage.setItem("canvasBackgroundColorDark", newColor);
       } else {
         canvasBackgroundColorLight = newColor;
-        localStorage.setItem('canvasBackgroundColorLight', newColor);
+        localStorage.setItem("canvasBackgroundColorLight", newColor);
       }
-    } else if (colorPickerContext === 'multipleNodes') {
+    } else if (colorPickerContext === "multipleNodes") {
       nodes.update((currentNodes) =>
         currentNodes.map((node) =>
           $selectedNodes.includes(node.id)
@@ -203,7 +228,7 @@
           ...originalNode.props,
           x: originalNode.props.x + 20,
           y: originalNode.props.y + 20,
-          label: originalNode.props.label + '.copy',
+          label: originalNode.props.label + ".copy",
         },
       };
       nodes.update((currentNodes) => [...currentNodes, duplicatedNode]);
@@ -223,40 +248,53 @@
 
   // Wrapper function for handling node context menu
   function handleNodeContextMenuWrapper(event) {
-    console.log('Node context menu triggered:', event.detail);
+    console.log("Node context menu triggered:", event.detail);
     const result = handleNodeContextMenu(event);
-    console.log('Context menu result:', result);
+    console.log("Context menu result:", result);
     contextMenuPosition = result.contextMenuPosition;
     contextMenuOptions = result.contextMenuOptions;
     isContextMenuVisible = result.isContextMenuVisible;
     contextMenuNodeId = result.contextMenuNodeId;
     colorPickerContext = result.colorPickerContext;
-    console.log('Context menu state after update:', { isContextMenuVisible, contextMenuOptions, contextMenuPosition });
+    console.log("Context menu state after update:", {
+      isContextMenuVisible,
+      contextMenuOptions,
+      contextMenuPosition,
+    });
   }
-  
+
   // Wrapper function for handling canvas context menu
   function handleCanvasContextMenuWrapper(event) {
-    console.log('Canvas context menu triggered:', event.detail);
+    console.log("Canvas context menu triggered:", event.detail);
     const result = handleCanvasContextMenu(event);
-    console.log('Canvas context menu result:', result);
+    console.log("Canvas context menu result:", result);
     contextMenuPosition = result.contextMenuPosition;
     contextMenuOptions = result.contextMenuOptions;
     isContextMenuVisible = result.isContextMenuVisible;
     contextMenuNodeId = result.contextMenuNodeId;
     colorPickerContext = result.colorPickerContext;
-    console.log('Context menu state after update:', { isContextMenuVisible, contextMenuOptions, contextMenuPosition });
+    console.log("Context menu state after update:", {
+      isContextMenuVisible,
+      contextMenuOptions,
+      contextMenuPosition,
+    });
   }
 
   // Wrapper function for handling canvas click
   function handleCanvasClickWrapper() {
-    console.log('Canvas click detected');
+    console.log("Canvas click detected");
     handleContextMenuClose();
   }
 </script>
 
+<!-- HTML structure for the main application -->
+
+<!-- Main application structure -->
+
 <svelte:window on:mousemove={handleMouseMove} on:mouseup={handleMouseUp} />
 
 <div class="app-container" class:dark-mode={$darkMode}>
+  <!-- Node factory tab for toggling the node factory panel -->
   <div
     bind:this={tabElement}
     role="tab"
@@ -269,17 +307,18 @@
   >
     node.factory
   </div>
+
+  <!-- Main content container -->
   <div class="content-container">
-    <div
-      class="node-factory"
-      style="width: {$nodeFactoryWidth}vw;"
-    >
+    <!-- Node factory panel -->
+    <div class="node-factory" style="width: {$nodeFactoryWidth}vw;">
       <NodeFactory on:createNode={handleCreateNode} />
     </div>
-    <div
-      class="separator"
-      style="left: {$nodeFactoryWidth}vw;"
-    ></div>
+
+    <!-- Separator between node factory and canvas -->
+    <div class="separator" style="left: {$nodeFactoryWidth}vw;"></div>
+
+    <!-- Canvas container for displaying nodes -->
     <div
       class="canvas-container"
       style="width: calc(100vw - {$nodeFactoryWidth}vw); left: {$nodeFactoryWidth}vw;"
@@ -287,11 +326,14 @@
       <Canvas
         {searchableNodes}
         {nodes}
-        canvasBackgroundColor={$darkMode ? canvasBackgroundColorDark : canvasBackgroundColorLight}
+        canvasBackgroundColor={$darkMode
+          ? canvasBackgroundColorDark
+          : canvasBackgroundColorLight}
         on:createNode={handleCreateNode}
         on:canvasClick={handleCanvasClickWrapper}
         on:canvasContextMenu={handleCanvasContextMenuWrapper}
       >
+        <!-- Render each node component -->
         {#each $nodes as node (node.id)}
           <svelte:component
             this={getNodeComponent(node.component)}
@@ -308,6 +350,7 @@
     </div>
   </div>
 
+  <!-- Modal for user interactions -->
   {#if isModalVisible}
     <Modal
       title={modalTitle}
@@ -315,11 +358,16 @@
       placeholder={modalPlaceholder}
       confirmText={modalConfirmText}
       bind:inputValue={modalInputValue}
-      on:confirm={(event) => Object.assign(this, handleModalConfirm(event, modalAction, modalNodeId))}
+      on:confirm={(event) =>
+        Object.assign(
+          this,
+          handleModalConfirm(event, modalAction, modalNodeId)
+        )}
       on:cancel={() => Object.assign(this, handleModalCancel())}
     />
   {/if}
 
+  <!-- Context menu for node and canvas interactions -->
   {#if isContextMenuVisible}
     <ContextMenu
       options={contextMenuOptions}
@@ -335,8 +383,9 @@
 </div>
 
 <style>
-  @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+  @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
+  /* Main application container */
   .app-container {
     position: relative;
     width: 100vw;
@@ -344,12 +393,14 @@
     overflow: hidden;
   }
 
+  /* Content container for node factory and canvas */
   .content-container {
     display: flex;
     width: 100vw;
     height: 100vh;
   }
 
+  /* Node factory tab styling */
   .node-factory-tab {
     position: fixed;
     top: 50%;
@@ -366,14 +417,15 @@
     transition: left 0.1s ease-out;
   }
 
+  /* Styling for open and dragging states of the node factory tab */
   .node-factory-tab.open {
     cursor: col-resize;
   }
-
   .node-factory-tab.dragging {
     pointer-events: none;
   }
 
+  /* Node factory panel styling */
   .node-factory {
     position: absolute;
     top: 0;
@@ -385,6 +437,7 @@
     transition: width 0.1s ease-out;
   }
 
+  /* Separator styling */
   .separator {
     position: absolute;
     top: 0;
@@ -394,22 +447,24 @@
     transition: left 0.1s ease-out;
   }
 
+  /* Canvas container styling */
   .canvas-container {
     position: absolute;
     top: 0;
     height: 100%;
-    transition: width 0.1s ease-out, left 0.1s ease-out;
+    transition:
+      width 0.1s ease-out,
+      left 0.1s ease-out;
   }
 
+  /* Dark mode styling */
   .dark-mode .node-factory-tab {
     background-color: #2980b9;
   }
-
   .dark-mode .node-factory {
     background-color: #2c3e50;
     border-right-color: #2980b9;
   }
-
   .dark-mode .separator {
     background-color: #2980b9;
   }
