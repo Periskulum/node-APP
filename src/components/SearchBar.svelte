@@ -1,18 +1,23 @@
 <script>
+  // Import necessary Svelte functions and stores
   import { createEventDispatcher, tick } from 'svelte';
   import { fade } from 'svelte/transition';
   import { darkMode } from '../stores/darkMode.js';
 
+  // Exported prop for searchable nodes
   export let searchableNodes = [];
 
+  // Local state variables
   let searchTerm = '';
   let filteredNodes = [];
   let selectedIndex = -1;
   let isVisible = false;
   let searchResults;
 
+  // Create event dispatcher for custom events
   const dispatch = createEventDispatcher();
 
+  // Reactive statement to filter nodes based on search term
   $: {
     if (searchTerm) {
       filteredNodes = searchableNodes.filter(node =>
@@ -26,10 +31,12 @@
     selectedIndex = -1;
   }
 
+  // Handle input event
   function handleInput() {
     // Remove automatic selection when there's only one result
   }
 
+  // Handle keydown events for navigation and selection
   async function handleKeydown(event) {
     if (event.key === 'ArrowDown') {
       event.preventDefault();
@@ -50,6 +57,7 @@
     }
   }
 
+  // Scroll the selected item into view
   function scrollSelectedIntoView() {
     if (searchResults && selectedIndex !== -1) {
       const selectedElement = searchResults.children[selectedIndex];
@@ -59,12 +67,14 @@
     }
   }
 
+  // Dispatch select event and reset search
   function selectNode(node) {
     dispatch('select', { x: node.x, y: node.y });
     searchTerm = '';
     isVisible = false;
   }
 
+  // Get the label for a node, with special handling for certain component types
   function getNodeLabel(node) {
     if (node.component && node.component.name) {
       const componentName = node.component.name.toLowerCase();
@@ -78,7 +88,9 @@
   }
 </script>
 
+<!-- Search bar container with dark mode support -->
 <div class="search-container" class:dark-mode={$darkMode}>
+  <!-- Search input field -->
   <input
     type="text"
     bind:value={searchTerm}
@@ -87,10 +99,10 @@
     placeholder="search.nodes"
   />
   {#if isVisible}
+    <!-- Search results list -->
     <ul class="search-results" transition:fade={{ duration: 100 }} bind:this={searchResults}>
       {#each filteredNodes as node, index}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+        <!-- Search result item -->
         <li
           class:selected={index === selectedIndex}
           on:click={() => selectNode(node)}
@@ -103,6 +115,7 @@
 </div>
 
 <style>
+  /* Styles for the search container */
   .search-container {
     position: absolute;
     top: 20px;
@@ -111,6 +124,7 @@
     z-index: 1000;
   }
 
+  /* Styles for the input field */
   input {
     width: 240px;
     padding: 10px 16px;
@@ -128,6 +142,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
   }
 
+  /* Styles for the search results list */
   .search-results {
     list-style-type: none;
     padding: 0;
@@ -139,6 +154,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   }
 
+  /* Styles for individual search result items */
   .search-results li {
     padding: 10px 16px;
     cursor: pointer;
@@ -150,6 +166,7 @@
     background-color: #f0f0f0;
   }
 
+  /* Dark mode styles */
   .dark-mode input {
     background-color: #333;
     color: #fff;

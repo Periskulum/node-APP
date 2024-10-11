@@ -118,21 +118,29 @@
 
   function handleCanvasContextMenu(event) {
     event.preventDefault();
+    console.log('Canvas context menu triggered');
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
     dispatch('canvasContextMenu', { x, y });
   }
 
-  function handleCanvasClick() {
-    dispatch('canvasClick');
+  function handleCanvasClick(event) {
+    console.log('Canvas clicked');
+    // Only deselect if the click is directly on the canvas (not on a node)
+    if (event.target === canvas) {
+      selectedNodes.set([]);
+      dispatch('canvasClick');
+    }
   }
-
 
   function handleNodeSelect(event) {
     const { x, y } = event.detail;
-    panX.set(width / 2 - x);
-    panY.set(height / 2 - y);
+    const nodeFactoryWidth = document.querySelector('.node-factory')?.offsetWidth || 0;
+    const centerX = (window.innerWidth - nodeFactoryWidth) / 2;
+    const centerY = window.innerHeight / 2;
+    panX.set(centerX - x);
+    panY.set(centerY - y);
     drawGrid();
     updateNodesPosition();
   }
@@ -144,6 +152,7 @@
   role="application"
   on:dragover|preventDefault={handleDragOver}
   on:drop|preventDefault={handleDrop}
+  on:click={handleCanvasClick}
 >
   <canvas
     bind:this={canvas}

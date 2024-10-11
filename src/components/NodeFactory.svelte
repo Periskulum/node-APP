@@ -1,6 +1,8 @@
 <script>
+  // Import necessary Svelte functions and components
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import { darkMode } from '../stores/darkMode.js';
+  import { nodes } from '../stores/nodes.js';
   import Node from './Node.svelte';
   import MakeNode from './MakeNode.svelte';
   import DarkNode from './DarkNode.svelte';
@@ -8,18 +10,17 @@
   import CalculatorNode from './CalculatorNode.svelte';
   import ImageNode from './ImageNode.svelte';
   import TodoNode from './TodoNode.svelte';
+  import { nodeFactoryWidth } from '../stores/nodeFactoryStore.js';
 
+  // Create an event dispatcher
   const dispatch = createEventDispatcher();
 
-  const TOP_MARGIN = 20; // Top margin for the first row of nodes
-  const LEFT_MARGIN = 30; // Left margin for all nodes
+  // Constants for initial node positions
+  const TOP_MARGIN = 20;
+  const LEFT_MARGIN = 30;
 
+  // Function to get initial nodes
   function getInitialNodes() {
-    const makeNodeWidth = 180;
-    const darkNodeWidth = 120;
-    const basicNodeWidth = 80;
-    const totalWidth = makeNodeWidth + darkNodeWidth + basicNodeWidth * 2;
-
     return [
       { id: 'factory-2', component: MakeNode, props: { x: LEFT_MARGIN + 100, y: TOP_MARGIN, label: 'make.node', width: 180, height: 80 } },
       { id: 'factory-3', component: DarkNode, props: { x: LEFT_MARGIN, y: TOP_MARGIN, label: 'dark.node', width: 80, height: 80 } },
@@ -31,40 +32,40 @@
     ];
   }
 
+  // Initialize state variables
   let factoryNodes = getInitialNodes();
   let factoryBounds;
-
-  // Panning variables
   let isPanning = false;
   let panY = 0;
   let startPanY = 0;
-
-  // Node dragging variables
   let isDraggingNode = false;
   let draggedNodeId = null;
   let startX = 0;
   let startY = 0;
 
+  // Handle canvas mouse down event for panning
   function handleCanvasMouseDown(event) {
-    if (event.button === 1) { // Middle mouse button
+    if (event.button === 1) {
       isPanning = true;
       startPanY = event.clientY - panY;
-      event.preventDefault(); // Prevent default middle-click behavior
+      event.preventDefault();
     }
   }
 
+  // Handle node mouse down event for dragging
   function handleNodeMouseDown(event, id) {
-    if (event.button === 1) { // Middle mouse button
+    if (event.button === 1) {
       isDraggingNode = true;
       draggedNodeId = id;
       const node = factoryNodes.find(n => n.id === id);
       startX = event.clientX - node.props.x;
       startY = event.clientY - node.props.y;
       event.preventDefault();
-      event.stopPropagation(); // Prevent event from triggering canvas panning
+      event.stopPropagation();
     }
   }
 
+  // Handle window mouse move event for dragging and panning
   function handleWindowMouseMove(event) {
     if (isDraggingNode && draggedNodeId) {
       const newX = event.clientX - startX;
@@ -77,50 +78,81 @@
     }
   }
 
+  // Handle window mouse up event to stop dragging and panning
   function handleWindowMouseUp(event) {
     if (event.button === 1) {
-      if (isDraggingNode) {
-        isDraggingNode = false;
-        draggedNodeId = null;
-      }
-      if (isPanning) {
-        isPanning = false;
-      }
+      isDraggingNode = false;
+      draggedNodeId = null;
+      isPanning = false;
     }
   }
 
+  // Add event listeners on mount
   onMount(() => {
     window.addEventListener('mousemove', handleWindowMouseMove);
     window.addEventListener('mouseup', handleWindowMouseUp);
   });
 
+  // Remove event listeners on destroy
   onDestroy(() => {
     window.removeEventListener('mousemove', handleWindowMouseMove);
     window.removeEventListener('mouseup', handleWindowMouseUp);
   });
 
+  // Reset node positions to initial state
   function resetNodePositions() {
     factoryNodes = getInitialNodes();
     panY = 0;
   }
 
+  // Handle drag start event for nodes
   function handleDragStart(event, node) {
     event.dataTransfer.setData('text/plain', JSON.stringify({
       type: node.component.name.toLowerCase().replace('proxy<', '').replace('>', ''),
       ...node.props
     }));
     event.dataTransfer.effectAllowed = 'copy';
+
+    // Create a custom drag image
+    const dragImage = event.target.cloneNode(true);
+    dragImage.style.position = 'absolute';
+    dragImage.style.top = '-1000px';
+    dragImage.style.opacity = '1'; // Make it fully opaque
+    document.body.appendChild(dragImage);
+
+    // Set the custom drag image
+    event.dataTransfer.setDragImage(dragImage, 0, 0);
+
+    // Remove the custom drag image after a short delay
+    setTimeout(() => {
+      document.body.removeChild(dragImage);
+    }, 0);
+  }
+
+  // Clear local storage and reset states
+  function clearLocalStorage() {
+    localStorage.clear();
+    nodes.set([]);
+    darkMode.set(false);
+    alert('Local storage cleared. Refresh the page to see the changes.');
   }
 </script>
 
+<!-- Main container for the node factory -->
 <div class="node-factory-content" bind:this={factoryBounds}>
+  <!-- Header section with title and buttons -->
   <div class="node-factory-header">
     <h2>node.factory</h2>
-    <button on:click={resetNodePositions} class="reset-button">
-      <span class="material-icons">restart_alt</span>
-    </button>
+    <div class="header-buttons">
+      <button on:click={clearLocalStorage} class="clear-storage-button" title="Clear local storage">
+        <span class="material-icons">delete_sweep</span>
+      </button>
+      <button on:click={resetNodePositions} class="reset-button" title="Reset node positions">
+        <span class="material-icons">restart_alt</span>
+      </button>
+    </div>
   </div>
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <!-- Canvas area for nodes -->
   <div class="factory-canvas"
        on:mousedown={handleCanvasMouseDown}
        on:mouseleave={handleWindowMouseUp}>
@@ -145,12 +177,14 @@
 </div>
 
 <style>
+  /* Styles for the main container */
   .node-factory-content {
     height: 100%;
     display: flex;
     flex-direction: column;
   }
 
+  /* Styles for the header section */
   .node-factory-header {
     background-color: #3498db;
     color: white;
@@ -164,7 +198,13 @@
     transition: background-color 0.3s ease;
   }
 
-  .reset-button {
+  .header-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .reset-button,
+  .clear-storage-button {
     background: none;
     border: none;
     color: white;
@@ -175,6 +215,7 @@
     justify-content: center;
   }
 
+  /* Styles for the canvas area */
   .factory-canvas {
     flex-grow: 1;
     position: relative;
@@ -188,7 +229,6 @@
     top: 0;
     left: 0;
     width: 100%;
-    transform: translateY();
   }
 
   .factory-node {
@@ -196,6 +236,7 @@
     pointer-events: auto;
   }
 
+  /* Dark mode styles */
   :global(.dark-mode) .node-factory-header {
     background-color: #2980b9;
   }
