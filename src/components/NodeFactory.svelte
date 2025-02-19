@@ -9,7 +9,9 @@
   import TextNode from "./TextNode.svelte";
   import CalculatorNode from "./CalculatorNode.svelte";
   import ImageNode from "./ImageNode.svelte";
-  import TodoNode from "./TodoNode.svelte";
+import TodoNode from "./TodoNode.svelte";
+import DebtNode from "./DebtNode.svelte";
+import BudgetNode from "./BudgetNode.svelte";
   import { nodeFactoryWidth } from "../stores/nodeFactoryStore.js";
 
   // Create an event dispatcher
@@ -90,6 +92,27 @@
           y: TOP_MARGIN + 820,
           title: "todo.node",
           tasks: [],
+        },
+      },
+      {
+        id: "factory-8",
+        component: BudgetNode,
+        props: {
+          x: LEFT_MARGIN,
+          y: TOP_MARGIN + 1020,
+          title: "budget.node",
+          transactions: [],
+        },
+      },
+      {
+        id: "factory-9",
+        component: DebtNode,
+        props: {
+          x: LEFT_MARGIN,
+          y: TOP_MARGIN + 1220,
+          title: "debt.node",
+          debts: [],
+          color: "#e74c3c"
         },
       },
     ];

@@ -9,6 +9,8 @@
   import ImageNode from "./components/ImageNode.svelte";
   import CalculatorNode from "./components/CalculatorNode.svelte";
   import TodoNode from "./components/TodoNode.svelte";
+  import BudgetNode from "./components/BudgetNode.svelte";
+  import DebtNode from "./components/DebtNode.svelte";
   import { darkMode } from "./stores/darkMode.js";
   import NodeFactory from "./components/NodeFactory.svelte";
   import { nodes } from "./stores/nodes.js";
@@ -136,6 +138,10 @@
         return CalculatorNode;
       case "TodoNode":
         return TodoNode;
+      case "BudgetNode":
+        return BudgetNode;
+      case "DebtNode":
+        return DebtNode;
       default:
         return Node;
     }

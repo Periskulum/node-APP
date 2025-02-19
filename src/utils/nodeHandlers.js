@@ -143,6 +143,28 @@ function createNewNode(type, x, y, props) {
           ...baseProps,
         },
       };
+    case "budgetnode":
+      return {
+        id,
+        component: "BudgetNode",
+        props: {
+          title: "budget.node",
+          color: props.color || "#2ecc71", // Default green color for BudgetNode
+          transactions: [],
+          ...baseProps,
+        },
+      };
+    case "debtnode":
+      return {
+        id,
+        component: "DebtNode",
+        props: {
+          title: "debt.node",
+          color: props.color || "#e74c3c", // Default red color for DebtNode
+          debts: [],
+          ...baseProps,
+        },
+      };
     default:
       console.log("Unknown node type:", type);
       return null;
