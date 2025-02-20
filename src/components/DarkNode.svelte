@@ -3,6 +3,7 @@
   import { darkMode } from "../stores/darkMode.js";
   import { getNextZIndex } from "../stores/zIndex.js";
   import { selectedNodes } from "../stores/selectionStore.js";
+  import { zoomLevel } from "../stores/zoomStore.js";
 
   export let x = 0;
   export let y = 0;
@@ -43,16 +44,16 @@
 
   function startDragging(event) {
     isDragging = true;
-    startX = event.clientX - x;
-    startY = event.clientY - y;
+    startX = event.clientX - (x * $zoomLevel);
+    startY = event.clientY - (y * $zoomLevel);
     zIndex = getNextZIndex();
     event.target.setPointerCapture(event.pointerId);
   }
 
   function handleMouseMove(event) {
     if (isDragging) {
-      const newX = event.clientX - startX;
-      const newY = event.clientY - startY;
+      const newX = (event.clientX - startX) / $zoomLevel;
+      const newY = (event.clientY - startY) / $zoomLevel;
       x = newX;
       y = newY;
       dispatch("move", { id, x: newX, y: newY });

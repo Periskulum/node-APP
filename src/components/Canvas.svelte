@@ -4,6 +4,7 @@
   import { darkMode } from "../stores/darkMode.js";
   import { panX, panY } from "../stores/panStore.js";
   import { selectedNodes } from "../stores/selectionStore.js";
+  import { zoomLevel } from "../stores/zoomStore.js";
   import SearchBar from "./SearchBar.svelte";
 
   // Exported props
@@ -26,6 +27,7 @@
   $: isDarkMode = $darkMode;
   $: currentPanX = $panX;
   $: currentPanY = $panY;
+  $: currentZoom = $zoomLevel;
 
   // Lifecycle hooks
   onMount(() => {
@@ -80,6 +82,22 @@
     }
   }
 
+  // Event handler for wheel events
+  function handleWheel(event) {
+    // Check if the target is a scrollable element
+    if (event.target.closest('.scrollable')) {
+      return; // Let default scroll behavior work
+    }
+
+    event.preventDefault();
+    const delta = event.deltaY > 0 ? 0.9 : 1.1; // Zoom out/in
+    zoomLevel.update(level => {
+      const newLevel = level * delta;
+      // Limit zoom between 0.1 and 3
+      return Math.min(Math.max(0.1, newLevel), 3);
+    });
+  }
+
   // Event handler for mouse down
   function handleMouseDown(event) {
     if (event.button === 1) {
@@ -111,7 +129,7 @@
   function updateNodesPosition() {
     const nodesContainer = document.querySelector(".nodes");
     if (nodesContainer) {
-      nodesContainer.style.transform = `translate(${currentPanX}px, ${currentPanY}px)`;
+      nodesContainer.style.transform = `translate(${currentPanX}px, ${currentPanY}px) scale(${currentZoom})`;
     }
   }
 
@@ -153,16 +171,30 @@
 
   // Event handler for node selection
   function handleNodeSelect(event) {
-    const { x, y } = event.detail;
-    const nodeFactoryWidth =
-      document.querySelector(".node-factory")?.offsetWidth || 0;
-    const centerX = (window.innerWidth - nodeFactoryWidth) / 2;
-    const centerY = window.innerHeight / 2;
+  const { x, y } = event.detail;
+  const nodeFactoryWidth = document.querySelector(".node-factory")?.offsetWidth || 0;
+  const centerX = (window.innerWidth - nodeFactoryWidth) / 2;
+  const centerY = window.innerHeight / 2;
+  
+  const nodesContainer = document.querySelector(".nodes");
+  nodesContainer.classList.add("searching");
+  
+  // Animate zoom first
+  zoomLevel.set(1);
+  
+  // Then animate the pan
+  setTimeout(() => {
     panX.set(centerX - x);
     panY.set(centerY - y);
     drawGrid();
     updateNodesPosition();
-  }
+    
+    // Remove the transition class after animation completes
+    setTimeout(() => {
+      nodesContainer.classList.remove("searching");
+    }, 500);
+  }, 0);
+}
 </script>
 
 <!-- Canvas container with event handlers -->
@@ -175,6 +207,7 @@
   on:dragover|preventDefault={handleDragOver}
   on:drop|preventDefault={handleDrop}
   on:click={handleCanvasClick}
+  on:wheel={handleWheel}
 >
   <!-- Canvas element with bindings and event handlers -->
   <canvas
@@ -187,7 +220,7 @@
   <!-- Nodes container with dynamic transform -->
   <div
     class="nodes"
-    style="transform: translate({currentPanX}px, {currentPanY}px);"
+    style="transform: translate({currentPanX}px, {currentPanY}px) scale({currentZoom});"
   >
     <slot></slot>
   </div>
@@ -210,18 +243,28 @@
     z-index: 0;
   }
 
-  /* Styles for the nodes container */
-  .nodes {
-    position: absolute;
-    top: 0;
-    left: 0;
-    will-change: transform;
-    z-index: 1;
-  }
+/* Styles for the nodes container */
+.nodes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  z-index: 1;
+  transform-origin: 0 0;
+}
+
+:global(.nodes.searching) {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
   /* Styles for dark mode */
   .dark-mode {
     background-color: #1a1a1a;
     color: #fff;
+  }
+
+  /* Style for scrollable elements within nodes */
+  :global(.scrollable) {
+    overflow-y: auto;
   }
 </style>

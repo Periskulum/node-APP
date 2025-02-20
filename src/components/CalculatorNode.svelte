@@ -4,6 +4,7 @@
   import { getNextZIndex } from "../stores/zIndex.js";
   import { darkMode } from "../stores/darkMode.js";
   import { selectedNodes } from "../stores/selectionStore.js";
+  import { zoomLevel } from "../stores/zoomStore.js";
 
   // Define component props with default values
   export let x = 0,
@@ -40,8 +41,8 @@
   // Start dragging the node and set initial positions
   function startDragging(event) {
     isDragging = true;
-    startX = event.clientX - x;
-    startY = event.clientY - y;
+    startX = event.clientX - (x * $zoomLevel);
+    startY = event.clientY - (y * $zoomLevel);
     zIndex = getNextZIndex();
     dispatch("select");
     event.target.setPointerCapture(event.pointerId);
@@ -50,8 +51,10 @@
   // Handle mouse move event to update node position
   function handleMouseMove(event) {
     if (isDragging) {
-      x = event.clientX - startX;
-      y = event.clientY - startY;
+      const newX = (event.clientX - startX) / $zoomLevel;
+      const newY = (event.clientY - startY) / $zoomLevel;
+      x = newX;
+      y = newY;
       dispatch("move", { id, x, y });
     }
   }

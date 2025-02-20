@@ -3,6 +3,7 @@
   import { createEventDispatcher, tick } from "svelte";
   import { fade } from "svelte/transition";
   import { darkMode } from "../stores/darkMode.js";
+  import { zoomLevel } from "../stores/zoomStore.js";
 
   // Exported prop for searchable nodes
   export let searchableNodes = [];
@@ -73,10 +74,13 @@
 
   // Dispatch select event and reset search
   function selectNode(node) {
-    dispatch("select", { x: node.x, y: node.y });
-    searchTerm = "";
-    isVisible = false;
-  }
+  // Reset zoom level to 1 (default)
+  zoomLevel.set(1);
+  // Then dispatch the selection event
+  dispatch("select", { x: node.x, y: node.y });
+  searchTerm = "";
+  isVisible = false;
+}
 
   // Get the label for a node, with special handling for certain component types
   function getNodeLabel(node) {
@@ -105,7 +109,7 @@
   {#if isVisible}
     <!-- Search results list -->
     <ul
-      class="search-results"
+      class="search-results scrollable"
       transition:fade={{ duration: 100 }}
       bind:this={searchResults}
     >

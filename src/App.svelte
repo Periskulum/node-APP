@@ -15,7 +15,6 @@
   import NodeFactory from "./components/NodeFactory.svelte";
   import { nodes } from "./stores/nodes.js";
   import ContextMenu from "./components/ContextMenu.svelte";
-  import Modal from "./components/Modal.svelte";
   import { selectedNodes } from "./stores/selectionStore.js";
   import { panX, panY } from "./stores/panStore.js";
   import {
