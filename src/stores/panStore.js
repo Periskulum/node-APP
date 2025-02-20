@@ -1,10 +1,21 @@
 // src/stores/panStore.js
 
-// Import the writable function from Svelte's store module
 import { writable } from "svelte/store";
 
-// Create a writable store for the X coordinate of the pan
-export const panX = writable(0);
+// Load initial pan positions from localStorage or use defaults
+const storedPanX = localStorage.getItem('canvas_pan_x');
+const storedPanY = localStorage.getItem('canvas_pan_y');
+const initialPanX = storedPanX ? parseFloat(storedPanX) : 0;
+const initialPanY = storedPanY ? parseFloat(storedPanY) : 0;
 
-// Create a writable store for the Y coordinate of the pan
-export const panY = writable(0);
+export const panX = writable(initialPanX);
+export const panY = writable(initialPanY);
+
+// Subscribe to changes and save to localStorage
+panX.subscribe(value => {
+  localStorage.setItem('canvas_pan_x', value.toString());
+});
+
+panY.subscribe(value => {
+  localStorage.setItem('canvas_pan_y', value.toString());
+});

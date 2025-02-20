@@ -61,8 +61,10 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="debt-editor" on:keydown={handleKeydown}>
   <div class="form-field">
+    <!-- svelte-ignore a11y-autofocus -->
     <input
       type="text"
       bind:value={editedDebt.source}

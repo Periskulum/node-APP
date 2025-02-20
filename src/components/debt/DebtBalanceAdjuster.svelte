@@ -43,6 +43,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="balance-adjuster" on:keydown={handleKeydown}>
   <div class="input-group">
     <span class="operation-icon">
@@ -50,6 +51,7 @@
         {operation === 'add' ? 'add' : 'remove'}
       </span>
     </span>
+    <!-- svelte-ignore a11y-autofocus -->
     <input
       type="number"
       bind:value={amount}

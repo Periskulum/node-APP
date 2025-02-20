@@ -17,7 +17,6 @@
 12. [License](#license)
 13. [Acknowledgements](#acknowledgements)
 
-
 ## Introduction
 node.app is an interactive, node-based application built with Svelte and Vite. It allows users to create, manipulate, and connect various types of nodes in a canvas-like environment. This project demonstrates the power and flexibility of Svelte for building complex, interactive user interfaces.
 
@@ -28,31 +27,57 @@ The core feature of the application is an interactive canvas where users can dra
 
 ### Multiple Node Types
 The application supports various node types, each with unique functionalities:
-- **Basic Node**: A simple node with basic properties.
-- **Make Node**: A node that allows users to create new nodes.
+- **Basic Node**: A simple node with basic properties and a label.
+- **Make Node**: A node that allows users to create new basic nodes.
 - **Dark Node**: A node that toggles the application's dark mode.
-- **Text Node**: A node for displaying and editing text content.
+- **Text Node**: A node for displaying and editing simple text content.
 - **Image Node**: A node for displaying images.
 - **Calculator Node**: A node with basic calculator functionalities.
 - **Todo Node**: A node for managing a todo list.
+- **Budget Node**: A comprehensive budgeting tool for tracking income and expenses, featuring:
+  - Transaction history with categories
+  - Income vs. expenses tracking
+  - Real-time balance calculations
+  - Date-based transaction logging
+- **Debt Node**: A debt management tool with detailed tracking features:
+  - Credit card and loan tracking
+  - Credit utilization monitoring
+  - Minimum payment calculations
+  - Total debt overview
+  - Individual debt item management
 
-### Node Factory
-The Node Factory component provides an interface for users to create new nodes. It includes options for selecting node types and configuring their initial properties.
+### Node Interaction Features
+- **Multi-Node Selection**: Select multiple nodes using Ctrl/Cmd+Click
+- **Node Locking**: Lock nodes to prevent accidental movement
+- **Node Color Customization**: Change colors of individual or multiple selected nodes
+- **Bulk Operations**: Apply changes to multiple selected nodes simultaneously
+- **Node Labels**: Custom labels for better organization
+- **Z-Index Management**: Control which nodes appear on top
 
-### Dark Mode Toggle
-Users can switch between light and dark modes using the Dark Node. This feature enhances the user experience by providing a comfortable viewing option in different lighting conditions.
+### Theme and Visual Customization
+- **Dark Mode Toggle**: Switch between light and dark modes using the Dark Node
+- **Canvas Color**: Customize the canvas background color for both light and dark modes
+- **Node Colors**: Personalize node colors via context menu
+- **Visual Feedback**: Highlights and shadows for selected and interactive states
 
-### Context Menu
-A context menu is available for both nodes and the canvas. Users can right-click to access additional options such as deleting nodes, editing properties, and more.
+### Node Factory Panel
+- **Resizable Interface**: Drag the panel edge to adjust width
+- **Collapsible Design**: Toggle panel visibility with tab
+- **Persistent Width**: Remember panel size between sessions
+- **Quick Access**: Efficiently create new nodes with drag-and-drop
 
-### Search Functionality
-The Search Bar component allows users to quickly find and navigate to specific nodes on the canvas. This is particularly useful in large projects with many nodes.
+### Canvas Navigation
+- **Pan Control**: Navigate large canvas layouts
+- **Zoom Functionality**: Adjust view scale for detail work
+- **Search Navigation**: Quickly locate specific nodes
+- **Context Menus**: Right-click access to common actions
 
-### Local Storage Persistence
-The state of the nodes is saved in the browser's local storage. This ensures that the user's layout and configurations are preserved across sessions.
-
-### Responsive Design
-The application is designed to be responsive, ensuring a seamless experience across different devices and screen sizes.
+### Management Tools
+- **Local Storage**: Persistent storage of node layouts and settings
+- **Context Menus**: Advanced node and canvas operations
+- **Search Functionality**: Quick node location and navigation
+- **Responsive Design**: Adapts to different screen sizes
+- **State Management**: Comprehensive Svelte store system
 
 ## Project Structure
 
@@ -65,23 +90,28 @@ node-APP/
 │   │   ├── DarkNode.svelte
 │   │   ├── ImageNode.svelte
 │   │   ├── MakeNode.svelte
-│   │   ├── Modal.svelte
 │   │   ├── Node.svelte
 │   │   ├── NodeFactory.svelte
 │   │   ├── SearchBar.svelte
 │   │   ├── TextNode.svelte
 │   │   ├── TodoNode.svelte
-│   │   └── CalculatorNode.svelte
+│   │   ├── BudgetNode.svelte
+│   │   ├── DebtNode.svelte
+│   │   ├── CalculatorNode.svelte
+│   │   └── debt/
+│   │       ├── DebtForm.svelte
+│   │       ├── DebtItem.svelte
+│   │       └── DebtItemEditor.svelte
 │   ├── stores/
 │   │   ├── darkMode.js
 │   │   ├── nodeFactoryStore.js
 │   │   ├── nodes.js
 │   │   ├── panStore.js
 │   │   ├── selectionStore.js
+│   │   ├── zoomStore.js
 │   │   └── zIndex.js
 │   ├── utils/
 │   │   ├── contextMenuHandlers.js
-│   │   ├── modalHandlers.js
 │   │   ├── NodeManager.js
 │   │   └── nodeHandlers.js
 │   ├── App.svelte
@@ -129,36 +159,55 @@ The application will be available at `http://localhost:5173` (or another port if
 ## Usage
 
 - Drag nodes from the node factory onto the canvas
-- Use the context menu (right-click) on nodes or the canvas for additional options
-- Toggle dark mode using the dark mode node
-- Search for nodes using the search bar at the top of the canvas
-- Create new nodes using the make node
-- Interact with specialized nodes like the calculator, todo, or text nodes
+- Use Ctrl/Cmd+Click to select multiple nodes
+- Right-click nodes or canvas for context menu options
+- Drag the node factory tab to resize the panel
+- Lock/unlock nodes to prevent accidental movement
+- Use the zoom controls to adjust the view
+- Customize node and canvas colors
+- Create and manage budgets with the Budget Node
+- Track debts and credit utilization with the Debt Node
+- Use the search bar to quickly find nodes
+- Save and load your workspace automatically
 
 ## Components
 
+### Core Components
 - **Canvas.svelte**: Main canvas component for rendering and managing nodes.
 - **Node.svelte**: Base node component providing structure and behavior for all node types.
-- **DarkNode.svelte**: Toggles dark mode, changing the application's theme.
+- **NodeFactory.svelte**: Manages node creation and factory panel interface.
+
+### Utility Nodes
+- **DarkNode.svelte**: Toggles dark mode and theme settings.
 - **MakeNode.svelte**: Interface for creating new nodes with configurable properties.
-- **TextNode.svelte**: Displays and edits text content with a text area.
-- **ImageNode.svelte**: Renders images specified by URL.
-- **CalculatorNode.svelte**: Performs basic arithmetic operations.
-- **TodoNode.svelte**: Manages a todo list with task management features.
-- **ContextMenu.svelte**: Provides additional options for node and canvas interactions.
-- **Modal.svelte**: Reusable component for displaying forms or information.
-- **NodeFactory.svelte**: Manages node types and their properties.
-- **SearchBar.svelte**: Allows quick location and navigation to specific nodes.
+- **SearchBar.svelte**: Quick node location and navigation.
+
+### Content Nodes
+- **TextNode.svelte**: Text content display and editing.
+- **ImageNode.svelte**: Image display from URLs.
+- **CalculatorNode.svelte**: Basic arithmetic operations.
+- **TodoNode.svelte**: Task management and lists.
+
+### Financial Management Nodes
+- **BudgetNode.svelte**: Complete budget tracking and management.
+- **DebtNode.svelte**: Debt and credit tracking system.
+- **DebtForm.svelte**: Debt entry and editing interface.
+- **DebtItem.svelte**: Individual debt item display and management.
+
+### Interface Components
+- **ContextMenu.svelte**: Right-click menu options.
 
 ## State Management
 
-The application uses Svelte stores:
+The application uses Svelte stores for state management:
 
-- **nodes.js**: Manages node state, including adding, updating, deleting, and persisting in local storage.
-- **darkMode.js**: Toggles the theme between light and dark modes.
-- **panStore.js**: Tracks canvas position for panning and zooming.
-- **selectionStore.js**: Tracks selected nodes and manages selection state.
-- **zIndex.js**: Ensures correct node layering based on z-index.
+- **nodes.js**: Central node state management
+- **darkMode.js**: Theme state control
+- **panStore.js**: Canvas navigation state
+- **zoomStore.js**: View scaling control
+- **selectionStore.js**: Multi-node selection state
+- **zIndex.js**: Node layering management
+- **nodeFactoryStore.js**: Factory panel state
 
 ## Detailed Component Interactions
 

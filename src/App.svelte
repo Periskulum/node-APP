@@ -34,12 +34,7 @@
     handleCanvasContextMenu,
     handleCanvasClick,
   } from "./utils/contextMenuHandlers.js";
-  import {
-    openModal,
-    handleModalConfirm,
-    handleModalCancel,
-    editNodeLabel,
-  } from "./utils/modalHandlers.js";
+ 
   import { nodeFactoryWidth } from "./stores/nodeFactoryStore.js";
 
   // State variables
@@ -355,22 +350,6 @@
     </div>
   </div>
 
-  <!-- Modal for user interactions -->
-  {#if isModalVisible}
-    <Modal
-      title={modalTitle}
-      message={modalMessage}
-      placeholder={modalPlaceholder}
-      confirmText={modalConfirmText}
-      bind:inputValue={modalInputValue}
-      on:confirm={(event) =>
-        Object.assign(
-          this,
-          handleModalConfirm(event, modalAction, modalNodeId)
-        )}
-      on:cancel={() => Object.assign(this, handleModalCancel())}
-    />
-  {/if}
 
   <!-- Context menu for node and canvas interactions -->
   {#if isContextMenuVisible}

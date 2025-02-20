@@ -2,5 +2,13 @@
 
 import { writable } from 'svelte/store';
 
-// Create a writable store for the zoom level, starting at 1 (100% zoom)
-export const zoomLevel = writable(1);
+// Load initial zoom from localStorage or use default of 1
+const storedZoom = localStorage.getItem('canvas_zoom');
+const initialZoom = storedZoom ? parseFloat(storedZoom) : 1;
+
+export const zoomLevel = writable(initialZoom);
+
+// Subscribe to changes and save to localStorage
+zoomLevel.subscribe(value => {
+  localStorage.setItem('canvas_zoom', value.toString());
+});
